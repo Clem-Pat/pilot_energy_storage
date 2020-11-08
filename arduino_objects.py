@@ -62,11 +62,16 @@ class Arduino_board():
 
     def get_sensor_value(self):
         if self.arduinoboard != None:
-            x = self.pin['A1'].read()
-            try :
-                return float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931)
-            except:
-                return 0
+            if 1 in self.analog_pins_used:
+                x = self.pin['A1'].read()
+                try :
+                    value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931)
+                    if value>=0 and value<=100:
+                        return value
+                    else:
+                        return 1
+                except:
+                    return 0
         else:
             return 0
 

@@ -50,16 +50,19 @@ class tkinterWindow():
         self.fen.bind('<Control_L>p', self.get_mouse_position)
         self.fen.bind('<Control_L><Return>', self.mouse_click)
         self.fen.bind('<Control_L>r', self.reload)
+        self.fen.bind('<space>', self.buttons[1].motor_start_stop)
 
         self.update()
-        self.mouse_click('event', position = self.center_position)
+        self.mouse_click(position = self.center_position)
 
 
-    def reload(self, event):
-        self.destroy('event')
+    def reload(*args):
+        self = args[0]
+        self.destroy()
         main.main()
 
-    def destroy(self, event):
+    def destroy(*args):
+        self = args[0]
         if self.init_pot_app != None:
             self.init_pot_app.fen.destroy()
             self.init_pot_app = None
@@ -67,12 +70,14 @@ class tkinterWindow():
             self.parent_app.init_pot_app = None
         self.fen.destroy()
 
-    def get_mouse_position(self, event):
+    def get_mouse_position(*args):
+        self = args[0]
         mouse = Controller()
         position = (mouse.position[0] - self.x - 10, mouse.position[1] - self.y - 30)
         print('Position : {}'.format(position))
 
-    def mouse_click(self, event, mouse = Controller(), position = Controller().position):
+    def mouse_click(*args, mouse = Controller(), position = Controller().position):
+        #si on ne force pas la souris à se déplacer (en précisant l'arg position), elle cliquera à l'endroit où elle se trouve
         mouse.position = position
         mouse.press(Button.left)
         mouse.release(Button.left)

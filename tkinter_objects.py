@@ -38,7 +38,7 @@ class tkinterButton(tk.Button):
                 self.bg, self.fg, self.cursor = "blue", 'black', "hand2"
                 self.config(command=self.initialiser_potentiometres, width=16, height=2,
                             text='Init Potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor, font='Arial 11 bold')
-                self.x, self.y = 500, 460
+                self.x, self.y = 550, 460
 
         elif self.app.name == "init_pot":
             self.value = 444
@@ -72,7 +72,8 @@ class tkinterButton(tk.Button):
             self.bg = 'green3'
             self.config(text="La rotation est\ndirecte", bg=self.bg)
 
-    def motor_start_stop(self):
+    def motor_start_stop(*args):
+        self = args[0]
         if self.bg == 'green3':
             self.bg = 'red'
             self.config(text="Arrêter le moteur", bg=self.bg)
