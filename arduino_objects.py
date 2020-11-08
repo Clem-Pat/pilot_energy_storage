@@ -78,16 +78,16 @@ class Arduino_board():
 
     def reupload_motor_command(self):
         if self.arduinoboard != None:
-            #sens de rotation :
-            if self.app.buttons[0]['text'] == 'La rotation est\ndirecte':
-                self.pin['d7'].write(0)
-                self.pin['d8'].write(1)
-            elif self.app.buttons[0]['text'] == 'La rotation est\nindirecte':
-                self.pin['d7'].write(1)
-                self.pin['d8'].write(0)
-
-            #vitesse de rotation :
             if self.motor_is_on:
+                #sens de rotation :
+                if self.app.buttons[0]['text'] == 'La rotation est\ndirecte':
+                    self.pin['d7'].write(0)
+                    self.pin['d8'].write(1)
+                elif self.app.buttons[0]['text'] == 'La rotation est\nindirecte':
+                    self.pin['d7'].write(1)
+                    self.pin['d8'].write(0)
+
+                #vitesse de rotation :
                 self.pin['d9'].write(self.app.scales[0].value)
             else:
                 self.pin['d9'].write(0)
