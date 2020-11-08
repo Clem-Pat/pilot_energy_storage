@@ -10,6 +10,7 @@ sensor pin A1
 IN4 pin d8
 IN3 pin d7
 ENB pin d9"""
+"""740g 0,75cL"""
 
 def chronometre(t):
 
