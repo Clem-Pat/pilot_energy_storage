@@ -59,10 +59,14 @@ class tkinterButton(tk.Button):
             self.value = self.app.board.pin["A0"].read()
 
     def initialiser_potentiometres(self):
-        init_pot_app = tkinter_window.tkinterWindow(
-            "init_pot", self.app.board, parent_app=self.app)
-        self.app.init_pot_app = init_pot_app
-        init_pot_app.place_all_objects()
+        if self.app.init_pot_app == None:
+            init_pot_app = tkinter_window.tkinterWindow(
+                "init_pot", self.app.board, parent_app=self.app)
+            self.app.init_pot_app = init_pot_app
+            init_pot_app.place_all_objects()
+        else:
+            self.app.mouse_click(position = self.app.init_pot_app.center_position)
+
 
     def motor_direction(self):
         if self.bg == 'green3':
