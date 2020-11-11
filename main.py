@@ -12,17 +12,6 @@ IN4 pin d8
 ENB pin d9"""
 """740g 0,75cL"""
 
-def chronometer(t):
-
-    # Conversion en tuple (1970, 1, 1, 0, 0, 4, 3, 1, 0)
-    temps_tuple = time.gmtime(t)
-    reste = t - temps_tuple[3] * 3600.0 - temps_tuple[4] * \
-        60.0 - temps_tuple[5] * 1.0  # on récupère le reste
-    # Affiche les dixièmes et centièmes de l'arrondi
-    reste = ("%.2f" % reste)[-2::]
-    tt = time.strftime("%H:%M:%S", temps_tuple) + "," + reste
-    return tt
-
 
 def main():
 
@@ -31,10 +20,7 @@ def main():
     app = tkinter_window.tkinterWindow('main', board) #Créer la fenêtre
     app.place_all_objects()
 
-    t0 = time.time()
     while True:
-        t = time.time() - t0
-        chrono = chronometer(t)
 
         board.analog_pot = board.get_potentiometer_value()
         board.analog_cap = board.get_sensor_value()
@@ -46,9 +32,6 @@ def main():
         try:
             board.reupload_motor_command()
 
-            app.canvas[1].itemconfig(3, text=chrono)
-            app.canvas[1].itemconfig(5, text="%.3f" %board.analog_pot) # Valeur rendue par le potentiomètre avec que 3 décimales
-            app.canvas[1].itemconfig(7, text="%.3f" %board.analog_cap) # Valeur rendue par le capteur de distance avec que 3 décimales
             app.update()
         except:
             break

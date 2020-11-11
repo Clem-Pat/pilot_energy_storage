@@ -41,15 +41,15 @@ class tkinterButton(tk.Button):
                 self.x, self.y = 550, 460
 
         elif self.app.name == "init_pot":
-            self.value = 444
-            self.bg, self.fg, self.cursor, self.command = "grey70", 'black', "hand2", self.def_value
+            self.bg, self.fg, self.cursor, self.command, self.value = "grey70", 'black', "hand2", self.def_value, None
+
             if self.id == 0:
                 self.config(width=20, height=2, command=self.command, font='Arial 11 bold',
                             text='Init 0 potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor)
                 self.x, self.y = 100, 200
 
             elif self.id == 1:
-                self.config(width=20, height=2, command=self.def_value, font='Arial 11 bold',
+                self.config(width=20, height=2, command=self.command, font='Arial 11 bold',
                             text='Init 90 potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor)
                 self.x, self.y = 350, 200
 
@@ -60,8 +60,9 @@ class tkinterButton(tk.Button):
     def def_value(*args):
         self = args[0]
         if self.app.board.arduinoboard != None:
-            """potentiometre pin A0"""
-            self.value = self.app.board.pin["A0"].read()
+            self.app.parent_app.particular_pot_value[self.id] = self.app.board.pin["A0"].read()
+        self.config(bg='grey80', fg='grey50', state=tk.DISABLED)
+
 
     def initialiser_potentiometres(*args):
         self = args[0]
@@ -143,6 +144,14 @@ class tkinterLabel(tk.Label):
                 self.config(text='Initialisation du potentiomètre', bg='grey70',
                             fg='black', font='Impact 30 bold')
                 self.x, self.y = 55, 40
+            if self.id == 1:
+                self.config(text='Valeur 0 potentiomètre : {}'.format(self.app.buttons[0].value), bg='grey70',
+                            fg='black', font='Arial 10')
+                self.x, self.y = 100, 300
+            if self.id == 2:
+                self.config(text='Valeur 90 potentiomètre : {}'.format(self.app.buttons[1].value), bg='grey70',
+                            fg='black', font='Arial 10')
+                self.x, self.y = 350, 300
 
 
 class tkinterScale(tk.Scale):

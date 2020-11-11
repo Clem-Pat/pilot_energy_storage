@@ -23,6 +23,7 @@ class tkinterWindow():
             self.length, self.height = 800, 800
             self.fen.title("Interface de pilotage du système de stockage d'énergie")
             self.fen.configure(bg="light blue")
+            self.t0 = time.time()
             self.buttons = [tkinterButton(self, i) for i in range(4)]
             self.labels = [tkinterLabel(self, i) for i in range(2)]
             self.scales = [tkinterScale(self, i) for i in range(1)]
@@ -33,6 +34,7 @@ class tkinterWindow():
             self.board.app = self
             self.board.reload()
             self.fen.bind('<space>', self.buttons[2].motor_start_stop)
+            self.particular_pot_value = [None, None]
 
 
         elif self.name == "init_pot":
@@ -42,7 +44,7 @@ class tkinterWindow():
             self.fen.title("Initialisation potentiomètres")
             self.fen.configure(bg="grey70")
             self.buttons = [tkinterButton(self, i) for i in range(2)]
-            self.labels = [tkinterLabel(self, i) for i in range(1)]
+            self.labels = [tkinterLabel(self, i) for i in range(3)]
             self.objects = [self.buttons, self.labels]
 
         self.fen.geometry("{}x{}+{}+{}".format(str(self.length),
@@ -52,7 +54,6 @@ class tkinterWindow():
         self.fen.bind('<Control_L>r', self.reload)
         self.fen.bind('<Control_L>p', self.get_mouse_position)
         self.fen.bind('<Control_L><Return>', self.mouse_click)
-        self.fen.bind('<Control_L>', self.elmt_click)
         self.fen.bind('<question>', self.print_shortcut)
 
 
@@ -99,15 +100,37 @@ class tkinterWindow():
         mouse.press(Button.left)
         mouse.release(Button.left)
 
-    def elmt_click(*args):
-        self = args[0]
-        self.fen.focus_get()
-
-
     def print_shortcut(*args):
         print("Détruire l'app : echap \nRecharger l'app : ctrl+r \nAfficher la position de la souris dans l'app : ctrl+p \ncliquer : ctrl+entrée \nDémarrer/Arrêter le moteur : espace \nAide raccourcis : maj+?")
 
+    def readable_time(self):
+        t = time.time() - self.t0
+        temps_tuple = time.gmtime(t)
+        reste = t - temps_tuple[3] * 3600.0 - temps_tuple[4] * \
+            60.0 - temps_tuple[5] * 1.0  # on récupère le reste
+        # Affiche les dixièmes et centièmes de l'arrondi
+        reste = ("%.2f" % reste)[-2::]
+        tt = time.strftime("%H:%M:%S", temps_tuple) + "," + reste
+        return tt
+
     def update(self):
+        if self.name == "main":
+            self.canvas[1].itemconfig(3, text=self.readable_time())
+            self.canvas[1].itemconfig(5, text="{:.3f}".format(self.board.analog_pot)) # Valeur rendue par le potentiomètre avec que 3 décimales
+            self.canvas[1].itemconfig(7, text="{:.3f}".format(self.board.analog_cap)) # Valeur rendue par le capteur de distance avec que 3 décimales
+
+            if self.init_pot_app != None:
+                try:
+                    self.init_pot_app.update()
+                except:
+                    self.init_pot_app = None
+
+        elif self.name == "init_pot":
+            if self.parent_app.particular_pot_value[0] == None :
+                self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.analog_pot))
+            if self.parent_app.particular_pot_value[1] == None :
+                self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.analog_pot))
+
         self.fen.update()
 
     def place_all_objects(self):
