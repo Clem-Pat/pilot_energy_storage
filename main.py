@@ -7,12 +7,12 @@ import tkinter_window
 
 """pot pin A0
 sensor pin A1
-IN4 pin d8
 IN3 pin d7
+IN4 pin d8
 ENB pin d9"""
 """740g 0,75cL"""
 
-def chronometre(t):
+def chronometer(t):
 
     # Conversion en tuple (1970, 1, 1, 0, 0, 4, 3, 1, 0)
     temps_tuple = time.gmtime(t)
@@ -34,7 +34,7 @@ def main():
     t0 = time.time()
     while True:
         t = time.time() - t0
-        chrono = chronometre(t)
+        chrono = chronometer(t)
 
         board.analog_pot = board.get_potentiometer_value()
         board.analog_cap = board.get_sensor_value()

@@ -17,34 +17,34 @@ class tkinterButton(tk.Button):
             self.clicked = False
 
             if self.id == 0:
-                self.bg, self.fg, self.cursor = 'green3', 'black', 'hand2'
+                self.bg, self.fg, self.cursor, self.command = 'green3', 'black', 'hand2', self.motor_direction
                 self.config(text="La rotation est\ndirecte", width=16, height=2, bg=self.bg, fg=self.fg, font="Arial 11 bold",
-                            relief=tk.RAISED, cursor=self.cursor, command=self.motor_direction)
+                            relief=tk.RAISED, cursor=self.cursor, command=self.command)
                 self.x, self.y = 460, 210
 
             if self.id == 1:
-                self.bg, self.fg, self.cursor = 'green3', 'black', 'hand2'
-                self.config(text="Démarrer le moteur", width=16, height=2, bg=self.bg, fg=self.fg, font="Arial 11 bold",
-                            relief=tk.RAISED, cursor=self.cursor, command=self.motor_start_stop)
-                self.x, self.y = 460, 290
-
-            if self.id == 2:
-                self.bg, self.fg, self.cursor = "red", 'black', "hand2"
+                self.bg, self.fg, self.cursor, self.command = "red", 'black', "hand2", self.def_pilote_mode
                 self.config(text='Pilotage manuel', width=16, height=2, bg=self.bg, fg=self.fg,
-                            cursor=self.cursor, font='Arial 11 bold', command=self.def_pilote_mode)
+                            cursor=self.cursor, font='Arial 11 bold', command=self.command)
                 self.x, self.y = 630, 210
 
+            if self.id == 2:
+                self.bg, self.fg, self.cursor, self.command = 'green3', 'black', 'hand2', self.motor_start_stop
+                self.config(text="Démarrer le moteur", width=16, height=2, bg=self.bg, fg=self.fg, font="Arial 11 bold",
+                            relief=tk.RAISED, cursor=self.cursor, command=self.command)
+                self.x, self.y = 460, 290
+
             if self.id == 3:
-                self.bg, self.fg, self.cursor = "blue", 'black', "hand2"
-                self.config(command=self.initialiser_potentiometres, width=16, height=2,
+                self.bg, self.fg, self.cursor, self.command = "blue", 'black', "hand2", self.initialiser_potentiometres
+                self.config(command=self.command, width=16, height=2,
                             text='Init Potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor, font='Arial 11 bold')
                 self.x, self.y = 550, 460
 
         elif self.app.name == "init_pot":
             self.value = 444
-            self.bg, self.fg, self.cursor = "grey70", 'black', "hand2"
+            self.bg, self.fg, self.cursor, self.command = "grey70", 'black', "hand2", self.def_value
             if self.id == 0:
-                self.config(width=20, height=2, command=self.def_value, font='Arial 11 bold',
+                self.config(width=20, height=2, command=self.command, font='Arial 11 bold',
                             text='Init 0 potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor)
                 self.x, self.y = 100, 200
 
@@ -53,12 +53,18 @@ class tkinterButton(tk.Button):
                             text='Init 90 potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor)
                 self.x, self.y = 350, 200
 
-    def def_value(self):
+        self.bind('<Return>', self.command)
+
+
+
+    def def_value(*args):
+        self = args[0]
         if self.app.board.arduinoboard != None:
             """potentiometre pin A0"""
             self.value = self.app.board.pin["A0"].read()
 
-    def initialiser_potentiometres(self):
+    def initialiser_potentiometres(*args):
+        self = args[0]
         if self.app.init_pot_app == None:
             init_pot_app = tkinter_window.tkinterWindow(
                 "init_pot", self.app.board, parent_app=self.app)
@@ -68,7 +74,8 @@ class tkinterButton(tk.Button):
             self.app.mouse_click(position = self.app.init_pot_app.center_position)
 
 
-    def motor_direction(self):
+    def motor_direction(*args):
+        self = args[0]
         if self.bg == 'green3':
             self.bg = 'red'
             self.config(text="La rotation est\nindirecte", bg=self.bg)
@@ -76,8 +83,10 @@ class tkinterButton(tk.Button):
             self.bg = 'green3'
             self.config(text="La rotation est\ndirecte", bg=self.bg)
 
+
     def motor_start_stop(*args):
         self = args[0]
+
         if self.bg == 'green3':
             self.bg = 'red'
             self.config(text="Arrêter le moteur", bg=self.bg)
@@ -87,7 +96,9 @@ class tkinterButton(tk.Button):
             self.config(text="Démarrer le moteur", bg=self.bg)
             self.app.board.motor_is_on = False
 
-    def def_pilote_mode(self):
+
+    def def_pilote_mode(*args):
+        self = args[0]
 
         if self.bg == 'red':
             self.bg = 'green3'
@@ -102,6 +113,10 @@ class tkinterButton(tk.Button):
             self.app.pilot_mode = 'manual'
             self.app.scales[0].change_state(tk.NORMAL)
             self.app.entrys[0].change_state(tk.NORMAL)
+
+    def unfocus(*args):
+        self = args[0]
+        self.app.labels[0].focus()
 
 
 class tkinterLabel(tk.Label):
@@ -216,7 +231,9 @@ class tkinterEntry(tk.Entry):
                 self.insert(0, 'Vitesse spécifique')
                 self.bind('<Return>', self.enter)
                 self.bind('<Button-1>', self.type)
+                self.bind_all('<Key>', self.type)
                 self.x, self.y = 55, 330
+
 
     def enter(self, state):
         try:  # l'exception sert à ignorer si l'utilisateur entre une valeur absurde.
@@ -228,13 +245,20 @@ class tkinterEntry(tk.Entry):
         except:
             self.delete(0, tk.END)
 
-    def type(self, state):
-        if self['fg'] == 'grey':
-            self.delete(0, tk.END)
-            self.config(fg='black')
+    def type(*args):
+        self, event = args[0], args[1]
+        if event.char == event.keysym or event.char == '<Button-1>':
+            if self['fg'] == 'grey':
+                self.delete(0, tk.END)
+                self.config(fg='black')
 
     def change_state(self, state):
+        self.config(state=state)
+        self.unfocus('state')
+
+    def unfocus(*args):
+        self = args[0]
         self.delete(0, tk.END)
         self.insert(0, 'Vitesse spécifique')
-        self.config(state=state, fg='grey')
-        self.app.labels[1].focus()
+        self.config(fg='grey')
+        self.app.labels[0].focus()
