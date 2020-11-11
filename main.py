@@ -14,24 +14,18 @@ ENB pin d9"""
 
 
 def main():
-
     board = arduino_objects.Arduino_board('COM7', [0,1], [7,8,9]) #Définir la carte arduino et les 3 pins avec lesquelles on communique.
-
     app = tkinter_window.tkinterWindow('main', board) #Créer la fenêtre
-    app.place_all_objects()
 
     while True:
-
         board.analog_pot = board.get_potentiometer_value()
         board.analog_cap = board.get_sensor_value()
 
-        if app.pilot_mode == 'auto':
-            if board.analog_cap < 10:
+        if app.pilot_mode == 'auto' and board.analog_cap < 10:
                 board.motor_is_on = False
 
         try:
             board.reupload_motor_command()
-
             app.update()
         except:
             break

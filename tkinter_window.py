@@ -56,7 +56,7 @@ class tkinterWindow():
         self.fen.bind('<Control_L><Return>', self.mouse_click)
         self.fen.bind('<question>', self.print_shortcut)
 
-
+        self.place_all_objects()
         self.update()
         self.mouse_click(position = self.center_position)
 
