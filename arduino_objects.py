@@ -26,7 +26,7 @@ class Arduino_board():
         try:
             # On définit la carte Arduino qui est branchée sur le port COM8
             self.arduinoboard = pyfirmata.Arduino(self.port)
-            self.app.canvas[0].itemconfig(3,  text='Arduino branchée {}        '.format(self.port), fill='green')
+            self.app.canvas[0].itemconfig(3,  text='Arduino branchée {}'.format(self.port), fill='green')
         except:
             self.arduinoboard = None
 
@@ -37,7 +37,7 @@ class Arduino_board():
             self.iterate.start()
 
             for i in self.analog_pins_used:
-                # On accepte la lecture des données de la pin analogue 0
+                # On accepte la lecture des données des pins analogue
                 self.arduinoboard.analog[i].enable_reporting()
 
             # On attend un peu pour laisser le temps à la carte de charger
