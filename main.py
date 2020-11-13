@@ -14,7 +14,7 @@ ENB pin d9"""
 
 
 def main():
-    board = arduino_objects.Arduino_board('COM7', [0,1], [7,8,9]) #Définir la carte arduino et les 3 pins avec lesquelles on communique.
+    board = arduino_objects.Arduino_board('COM7', [0,1], [7,8,9,11]) #Définir la carte arduino et les 3 pins avec lesquelles on communique.
     app = tkinter_window.tkinterWindow('main', board) #Créer la fenêtre
 
     while True:
@@ -22,12 +22,19 @@ def main():
         board.analog_cap = board.get_sensor_value()
 
         if app.pilot_mode == 'auto' and board.analog_cap < 10:
-                board.motor_is_on = False
+                board.stop_motor()
 
-        try:
-            board.reupload_motor_command()
-            app.update()
-        except:
+        # if board.arduinoboard != None:
+        #     board.pin['d7'].write(0)
+        #     board.pin['d8'].write(1)
+        #     board.pin['d9'].write(100)
+        if board.arduinoboard != None :
+            board.pin["d11"].write((int(app.scales[0].value))*180/255)
+
+        app.update()
+        # except:
+        #     break
+        if app.buttons[0].bg == 'red':
             break
 
 

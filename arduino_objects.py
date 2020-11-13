@@ -19,7 +19,6 @@ class Arduino_board():
         self.app = None
         self.arduinoboard = None
         self.pin = None
-        self.motor_is_on = False
         self.analog_cap, self.analog_pot = self.get_sensor_value(), self.get_potentiometer_value()
 
     def reload(self):
@@ -31,27 +30,21 @@ class Arduino_board():
             self.arduinoboard = None
 
         if self.arduinoboard != None:
-            # On accepte de soutirer des infos à la carte
             self.iterate = pyfirmata.util.Iterator(self.arduinoboard)
-            # On démarre la lecture des données (itérative cad qu'on actualise la lecture des données)
             self.iterate.start()
-
-            for i in self.analog_pins_used:
-                # On accepte la lecture des données des pins analogue
-                self.arduinoboard.analog[i].enable_reporting()
-
-            # On attend un peu pour laisser le temps à la carte de charger
             time.sleep(1)
 
             self.pin = {}
             for i in self.analog_pins_used:
+                self.arduinoboard.analog[i].enable_reporting()
                 self.pin["A" + str(i)] = self.arduinoboard.analog[i]
                 self.pin["A" + str(i)].value = self.pin["A" + str(i)].read()
                 time.sleep(0.5)
-            for i in self.digital_pins_used:
-                self.pin["d" + str(i)] = self.arduinoboard.get_pin('d:' + str(i) + ':s')
-                self.pin["d" + str(i)].value = 90
-                self.pin["d" + str(i)].write(self.pin["d" + str(i)].value)
+            for j in self.digital_pins_used:
+                self.pin["d" + str(j)] = self.arduinoboard.get_pin('d:' + str(j) + ':s')
+                self.pin["d" + str(j)].value = None
+
+            self.init_board()
 
         else:
             self.pin = {}
@@ -59,6 +52,13 @@ class Arduino_board():
                 self.pin["A" + str(i)] = None
             for i in self.digital_pins_used:
                 self.pin["d" + str(i)] = None
+
+
+    def init_board(self):
+        self.pin["d9"].write(self.app.scales[0].value)
+        self.pin['d7'].write(0)
+        self.pin['d8'].write(1)
+
 
     def get_sensor_value(self):
         if self.arduinoboard != None:
@@ -75,27 +75,29 @@ class Arduino_board():
         else:
             return 0
 
+
     def get_potentiometer_value(self):
         if self.arduinoboard != None:
             return self.pin['A0'].read()
         else:
             return 0
 
-    def reupload_motor_command(self):
+
+    def change_motor_rotation(self, rotation_direction):
         if self.arduinoboard != None:
-            if self.motor_is_on:
-                #sens de rotation :
-                if self.app.buttons[0]['text'] == 'La rotation est\ndirecte':
-                    self.pin['d7'].write(0)
-                    self.pin['d8'].write(1)
-                elif self.app.buttons[0]['text'] == 'La rotation est\nindirecte':
-                    self.pin['d7'].write(1)
-                    self.pin['d8'].write(0)
+            #sens de rotation :
+            if rotation_direction == 'direct':
+                self.pin['d7'].write(0)
+                self.pin['d8'].write(1)
+            elif rotation_direction == 'indirect':
+                self.pin['d7'].write(1)
+                self.pin['d8'].write(0)
 
-                #vitesse de rotation :
-                self.pin['d9'].write(self.app.scales[0].value)
-            else:
-                self.pin['d9'].write(0)
 
-        else:
-            pass
+    def change_motor_speed(self, value):
+        self.pin['d9'].write(value)
+
+    def stop_motor(self):
+        self.pin['d9'].write(0)
+    def start_motor(self):
+        self.pin['d9'].write(self.app.scales[0].value)

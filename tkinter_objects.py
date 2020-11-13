@@ -80,9 +80,11 @@ class tkinterButton(tk.Button):
         if self.bg == 'green3':
             self.bg = 'red'
             self.config(text="La rotation est\nindirecte", bg=self.bg)
+            self.app.board.change_motor_rotation('indirect')
         else:
             self.bg = 'green3'
             self.config(text="La rotation est\ndirecte", bg=self.bg)
+            self.app.board.change_motor_rotation('direct')
 
 
     def motor_start_stop(*args):
@@ -91,11 +93,11 @@ class tkinterButton(tk.Button):
         if self.bg == 'green3':
             self.bg = 'red'
             self.config(text="Arrêter le moteur", bg=self.bg)
-            self.app.board.motor_is_on = True
+            self.app.board.start_motor()
         else:
             self.bg = 'green3'
             self.config(text="Démarrer le moteur", bg=self.bg)
-            self.app.board.motor_is_on = False
+            self.app.board.stop_motor()
 
 
     def def_pilote_mode(*args):
@@ -173,6 +175,7 @@ class tkinterScale(tk.Scale):
 
     def get_value(self, value):
         self.value = value
+        self.app.board.change_motor_speed(value)
 
     def change_state(self, state):
         if state == tk.DISABLED:
