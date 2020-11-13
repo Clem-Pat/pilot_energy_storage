@@ -11,7 +11,8 @@ iterate = pyfirmata.util.Iterator(board)
 iterate.start()
 time.sleep(0.05)
 
-A0pin = board.analog[0].enable_reporting()
+A0pin = board.analog[0]
+A0pin.enable_reporting()
 IN3pin = board.get_pin('d:7:s')
 IN4pin = board.get_pin('d:8:s')
 ENBpin = board.get_pin('d:9:s')
