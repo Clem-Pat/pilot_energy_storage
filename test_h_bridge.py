@@ -11,14 +11,10 @@ iterate = pyfirmata.util.Iterator(board)
 iterate.start()
 time.sleep(0.05)
 
-A0pin = board.analog[0]
-A0pin.enable_reporting()
-IN3pin = board.get_pin('d:7:s')
-IN4pin = board.get_pin('d:8:s')
-ENBpin = board.get_pin('d:9:s')
+IN3pin = board.digital[7]
+IN4pin = board.digital[8]
+ENBpin = board.digital[9]
 
 IN3pin.write(1)
 IN4pin.write(0)   #
 ENBpin.write(100) #vitesse [0,255]
-
-print(A0pin.read())
