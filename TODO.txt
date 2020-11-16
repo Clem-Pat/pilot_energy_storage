@@ -1,0 +1,9 @@
+In pyfirmata.Pin :
+
+	def write(value)
+		Output a voltage from the pin
+
+		Parameters:	value – Uses value as a boolean if the pin is in output mode,
+		or expects a float from 0 to 1 if the pin is in PWM mode.
+		If the pin is in SERVO the value should be in degrees.
+	
