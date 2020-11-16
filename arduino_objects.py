@@ -99,5 +99,6 @@ class Arduino_board():
 
     def stop_motor(self):
         self.pin['d9'].write(0)
+        
     def start_motor(self):
         self.pin['d9'].write(self.app.scales[0].value)

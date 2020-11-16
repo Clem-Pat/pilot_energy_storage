@@ -24,13 +24,10 @@ def main():
         if app.pilot_mode == 'auto' and board.analog_cap < 10:
                 board.stop_motor()
 
-        # if board.arduinoboard != None:
-        #     board.pin['d7'].write(0)
-        #     board.pin['d8'].write(1)
-        #     board.pin['d9'].write(100)
         if board.arduinoboard != None :
             board.pin["d11"].write((int(app.scales[0].value))*180/255)
 
+        # try:
         app.update()
         # except:
         #     break

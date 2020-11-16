@@ -123,7 +123,7 @@ class tkinterWindow():
                 try:
                     self.init_pot_app.update()
                 except:
-                    self.init_pot_app = None
+                    self.init_pot_app = None    #the init_pot_app has been destroyed with red cross
 
         elif self.name == "init_pot":
             if self.parent_app.particular_pot_value[0] == None :
