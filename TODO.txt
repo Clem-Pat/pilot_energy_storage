@@ -1,2 +1,0 @@
-know Sensor's function
-Work with sensor 
