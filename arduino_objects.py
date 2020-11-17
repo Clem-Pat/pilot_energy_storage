@@ -8,18 +8,23 @@ IN3 pin d7
 IN4 pin d8
 ENB pin d9"""
 
-class Arduino_board():
+class Arduino_uno_board():
 
-    def __init__(self, usb_port, analogs, digitals):
+    def __init__(self, usb_port, analogs=[], output_pins=[], pwm_pins=[], servo_pins=[]):
+        """analogs = [0, 1, 2, 3, 4, 5], output_pins = [2, 4, 7, 8, 12, 13], pwm_pins=[3, 5, 6, 9, 10, 11]"""
 
         self.name = 'board_' + usb_port
         self.port = usb_port
-        self.analog_pins_used = analogs
-        self.digital_pins_used = digitals
-        self.app = None
         self.arduinoboard = None
+        self.analog_pins = analogs
+        self.digital_pins = output_pins + pwm_pins + servo_pins
+        self.pwm_pins = pwm_pins
+        self.servo_pins = servo_pins
+        self.app = None
         self.pin = None
         self.analog_cap, self.analog_pot = self.get_sensor_value(), self.get_potentiometer_value()
+        self.motor_is_on = False
+        self.pilot_mode = 'manual'
 
     def reload(self):
         try:
@@ -35,34 +40,40 @@ class Arduino_board():
             time.sleep(1)
 
             self.pin = {}
-            for i in self.analog_pins_used:
+            for i in self.analog_pins:
                 self.arduinoboard.analog[i].enable_reporting()
                 self.pin["A" + str(i)] = self.arduinoboard.analog[i]
                 self.pin["A" + str(i)].value = self.pin["A" + str(i)].read()
                 time.sleep(0.5)
-            for j in self.digital_pins_used:
-                self.pin["d" + str(j)] = self.arduinoboard.get_pin('d:' + str(j) + ':s')
+
+            for j in self.digital_pins:
+                if j in self.pwm_pins:
+                    self.pin["d" + str(j)] = self.arduinoboard.get_pin('d:' + str(j) + ':p')
+                elif j in self.servo_pins:
+                    self.pin["d" + str(j)] = self.arduinoboard.get_pin('d:' + str(j) + ':s')
+                else:
+                    self.pin["d" + str(j)] = self.arduinoboard.get_pin('d:' + str(j) + ':o')
                 self.pin["d" + str(j)].value = None
 
             self.init_board()
 
         else:
             self.pin = {}
-            for i in self.analog_pins_used:
+            for i in self.analog_pins:
                 self.pin["A" + str(i)] = None
-            for i in self.digital_pins_used:
+            for i in self.digital_pins:
                 self.pin["d" + str(i)] = None
 
 
     def init_board(self):
-        self.pin["d9"].write(self.app.scales[0].value)
+        self.pin['d9'].write(0)
         self.pin['d7'].write(0)
         self.pin['d8'].write(1)
 
 
     def get_sensor_value(self):
         if self.arduinoboard != None:
-            if 1 in self.analog_pins_used:
+            if 1 in self.analog_pins:
                 x = self.pin['A1'].read()
                 try :
                     value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931)
@@ -95,10 +106,13 @@ class Arduino_board():
 
 
     def change_motor_speed(self, value):
-        self.pin['d9'].write(value)
+        if self.motor_is_on:
+            self.pin['d9'].write(int(value)/255)
 
     def stop_motor(self):
+        self.motor_is_on = False
         self.pin['d9'].write(0)
-        
+
     def start_motor(self):
-        self.pin['d9'].write(self.app.scales[0].value)
+        self.motor_is_on = True
+        self.pin['d9'].write(int(self.app.scales[0].value)/255)

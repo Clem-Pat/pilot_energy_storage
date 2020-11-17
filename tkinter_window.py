@@ -15,7 +15,6 @@ class tkinterWindow():
         self.board = board
         self.init_pot_app = init_pot_app
         self.parent_app = parent_app
-        self.pilot_mode = "manual"
 
         if self.name == 'main':
             self.x, self.y = 450, 0

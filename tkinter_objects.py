@@ -106,14 +106,14 @@ class tkinterButton(tk.Button):
         if self.bg == 'red':
             self.bg = 'green3'
             self.config(text='Pilotage automatique', bg=self.bg)
-            self.app.pilot_mode = 'auto'
+            self.app.board.pilot_mode = 'auto'
             self.app.scales[0].change_state(tk.DISABLED)
             self.app.entrys[0].change_state(tk.DISABLED)
 
         elif self.bg == 'green3':
             self.bg = 'red'
             self.config(text='Pilotage manuel', bg=self.bg)
-            self.app.pilot_mode = 'manual'
+            self.app.board.pilot_mode = 'manual'
             self.app.scales[0].change_state(tk.NORMAL)
             self.app.entrys[0].change_state(tk.NORMAL)
 
