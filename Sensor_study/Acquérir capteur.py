@@ -3,6 +3,7 @@ Placer un écran à un position de référence sur une règle graduée de 50cm.
 Déplacer le capteur sur cette règle graduée.
 Entrer la valeur de la position du capteur puis cliquer sur entrée.
 Le programme crée des listes de ces valeurs successives et plot la tension rendue par le capteur en fonction de la distance réelle.
+Il crée également un fichier excel pour stocker les valeurs de façon lisibile et interprétable. NE PAS UTILISER LA CROIX ROUGE POUR FERMER mais le boutton stop !!!
 Trouver un programme pour créer une fonction qui approche la loi du capteur.
 """
 import tkinter as tk
