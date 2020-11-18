@@ -93,11 +93,11 @@ class tkinterButton(tk.Button):
         if self.bg == 'green3':
             self.bg = 'red'
             self.config(text="Arrêter le moteur", bg=self.bg)
-            self.app.board.start_motor()
+            self.app.board.start_motor(forced=True)
         else:
             self.bg = 'green3'
             self.config(text="Démarrer le moteur", bg=self.bg)
-            self.app.board.stop_motor()
+            self.app.board.stop_motor(forced=True)
 
 
     def def_pilote_mode(*args):
@@ -107,15 +107,11 @@ class tkinterButton(tk.Button):
             self.bg = 'green3'
             self.config(text='Pilotage automatique', bg=self.bg)
             self.app.board.pilot_mode = 'auto'
-            self.app.scales[0].change_state(tk.DISABLED)
-            self.app.entrys[0].change_state(tk.DISABLED)
 
         elif self.bg == 'green3':
             self.bg = 'red'
             self.config(text='Pilotage manuel', bg=self.bg)
             self.app.board.pilot_mode = 'manual'
-            self.app.scales[0].change_state(tk.NORMAL)
-            self.app.entrys[0].change_state(tk.NORMAL)
 
     def unfocus(*args):
         self = args[0]

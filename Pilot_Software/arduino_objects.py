@@ -71,6 +71,9 @@ class Arduino_uno_board():
             self.pin['d7'].write(0)
             self.pin['d8'].write(1)
 
+    def exit(self):
+        self.arduinoboard.exit()
+
 
     def get_sensor_value(self):
         if self.arduinoboard != None:
@@ -110,12 +113,14 @@ class Arduino_uno_board():
         if self.arduinoboard != None and self.motor_is_on:
             self.pin['d9'].write(int(value)/255)
 
-    def stop_motor(self):
+    def stop_motor(self, forced=False):
         self.motor_is_on = False
+        self.motor_is_forced = forced
         if self.arduinoboard != None:
             self.pin['d9'].write(0)
 
-    def start_motor(self):
+    def start_motor(self, forced=False):
         self.motor_is_on = True
+        self.motor_is_forced = forced
         if self.arduinoboard != None:
             self.pin['d9'].write(int(self.app.scales[0].value)/255)

@@ -21,12 +21,16 @@ def main():
         board.analog_pot = board.get_potentiometer_value()
         board.analog_cap = board.get_sensor_value()
 
-        if board.pilot_mode == 'auto' and board.motor_is_on and board.analog_cap < 10:
-            board.stop_motor()
+        if board.pilot_mode == 'auto' :
+            if board.motor_is_on and board.analog_cap < 10 :
+                board.stop_motor()
+            if not board.motor_is_on and board.analog_cap >= 10 and not board.motor_is_forced:
+                board.start_motor()
 
         try:
             app.update()
         except:
+            board.exit()
             break
 
 

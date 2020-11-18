@@ -54,6 +54,7 @@ class tkinterWindow():
         self.fen.bind('<Control_L>p', self.get_mouse_position)
         self.fen.bind('<Control_L><Return>', self.mouse_click)
         self.fen.bind('<question>', self.print_shortcut)
+        self.fen.protocol("WM_DELETE_WINDOW", self.destroy)
 
         self.place_all_objects()
         self.update()
