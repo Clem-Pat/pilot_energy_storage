@@ -7,6 +7,14 @@ import numpy as np
 from pynput.mouse import Button, Controller
 import time
 
+"""tachymeter pin A0
+sensor pin A1
+IN3 pin d7
+IN4 pin d8
+ENB pin d9"""
+"""740g 0,75cL"""
+
+
 
 class tkinterApp():
     def __init__(self, board):

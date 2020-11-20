@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import os
 from Create_excel_file import create_excel as create_excel
 
+"""sensor pin A0"""
 
 class tkinterApp():
     def __init__(self, board):
