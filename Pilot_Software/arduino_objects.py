@@ -80,7 +80,11 @@ class Arduino_uno_board():
             if 1 in self.analog_pins:
                 x = self.pin['A1'].read()
                 try :
-                    value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931)
+                    # value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931) #3/2
+                    if x>0.55:
+                        value = float((64.84*10**3)*np.exp(-(float(x)-0.552)/2072.666)-64.83*10**3)
+                    else:
+                        value = float(71.36*np.exp(-(float(x)-78.2*10**(-3))/0.104)+9.445) #5/2
                     if value>=0 and value<=100:
                         return value
                     else:

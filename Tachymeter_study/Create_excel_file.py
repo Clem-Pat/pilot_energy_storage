@@ -9,14 +9,14 @@ def create_excel(L0,L1,path):
         df = pd.DataFrame({ 'vitesse_moyenne':L0,
                             'tension_moyenne_mesurée': L1})
 
-        writer = pd.ExcelWriter(path+'/Valeurs_capteur.xlsx')
+        writer = pd.ExcelWriter(path+'/Valeurs_capteur_1.xlsx')
         df.to_excel(writer, sheet_name='Valeurs', index=False)
 
         writer.save()
         print('Excel file created')
 
-        read_file = pd.read_excel (path+'/Valeurs_capteur.xlsx')
-        read_file.to_csv (path+'/Valeurs_capteur.csv', index=False, header=True)
+        read_file = pd.read_excel (path+'/Valeurs_capteur_1.xlsx')
+        read_file.to_csv (path+'/Valeurs_capteur_1.csv', index=False, header=True)
         print('CSV file created')
 
     else:
