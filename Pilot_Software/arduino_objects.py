@@ -78,19 +78,20 @@ class Arduino_uno_board():
     def get_sensor_value(self):
         if self.arduinoboard != None:
             if 1 in self.analog_pins:
-                x = self.pin['A1'].read()
-                try :
-                    # value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931) #3/2
-                    if x>0.55:
-                        value = float((64.84*10**3)*np.exp(-(float(x)-0.552)/2072.666)-64.83*10**3)
-                    else:
-                        value = float(71.36*np.exp(-(float(x)-78.2*10**(-3))/0.104)+9.445) #5/2
-                    if value>=0 and value<=100:
-                        return value
-                    else:
-                        return 1
-                except:
-                    return 0
+                x = float(self.pin['A1'].read())
+
+                # value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931) #3/2
+                # value = float(71.36*np.exp(-(float(x)-78.2*10**(-3))/0.104)+9.445) #5/2 old
+                if x>0.43 and x<=0.6: #entre 5 et 13 cm
+                    value = float(-24.891 * float(x) + 23.646)
+                if x>=0.15 and x<=0.43: #entre 13cm et 40cm
+                    value = float(28.553 * np.exp(-(float(x) - 0.154) / 0.13) + 9.706)
+                if x>0.12 and x<0.15: #entre 40 et 50cm
+                    value = float(-520 * float(x) + 117)
+                if x>0.08 and x<=0.12: #entre 50 et 80cm
+                    value = float(79.49 * np.exp(- (float(x) - 0.089) / 0.084762) - 0.512)
+                else:
+                    return 80
         else:
             return 0
 
