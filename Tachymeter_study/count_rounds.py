@@ -68,8 +68,7 @@ class tkinterApp():
     def update(self):
         if self.board.arduinoboard != None :
 
-            x = self.board.sensor.read()
-            value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931)
+            value = self.board.get_sensor_value()
             self.label.config(text = str(self.board.count_rounds) + ' : ' + str(self.readable_time()))
 
             if value < 10 and self.board.rising_edge == 0:
@@ -176,6 +175,26 @@ class Board():
         if self.arduinoboard != None:
             self.enB.write(int(value)/255)
 
+    def get_sensor_value(self):
+        if self.arduinoboard != None:
+            x = float(self.sensor.read())
+
+            # value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931) #3/2
+            # value = float(71.36*np.exp(-(float(x)-78.2*10**(-3))/0.104)+9.445) #5/2 old
+            if x>0.43 and x<=0.7: #entre 5 et 13 cm
+                value = float(-24.891 * float(x) + 23.646)
+            if x>=0.15 and x<=0.43: #entre 13cm et 40cm
+                value = float(28.553 * np.exp(-(float(x) - 0.154) / 0.13) + 9.706)
+            if x>0.12 and x<0.15: #entre 40 et 50cm
+                value = float(-520 * float(x) + 117)
+            if x>0.08 and x<=0.12: #entre 50 et 80cm
+                value = float(79.49 * np.exp(- (float(x) - 0.089) / 0.084762) - 0.512)
+            else:
+                value = 90
+            return value
+        else:
+            return 0
+
 
 def main():
     board = Board('COM7')
@@ -185,7 +204,8 @@ def main():
         try:
             app.update()
         except:
-            board.enB.write(0)
+            if board.arduinoboard != None:
+                board.enB.write(0)
             break
 
 
