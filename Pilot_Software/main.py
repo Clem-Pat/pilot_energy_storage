@@ -18,7 +18,7 @@ def main():
     app = tkinter_window.tkinterWindow('main', board) #Créer la fenêtre
 
     while True:
-        board.analog_pot = board.get_potentiometer_value()
+        board.analog_pot = board.get_rotation_speed_value()
         board.analog_cap = board.get_sensor_value()
 
         if board.pilot_mode == 'auto' :
@@ -26,6 +26,9 @@ def main():
                 board.stop_motor()
             if not board.motor_is_on and board.analog_cap >= 10 and not board.motor_is_forced:
                 board.start_motor()
+
+        if board.record_demanded == True:
+            board.record_mesures()
 
         try:
             app.update()

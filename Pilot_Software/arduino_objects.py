@@ -1,6 +1,11 @@
 import pyfirmata  # module de communication avec la carte Arduino
 import time
 import numpy as np
+import os
+import datetime
+
+from Create_excel_file import create_excel
+
 
 """pot pin A0
 sensor pin A1
@@ -22,13 +27,17 @@ class Arduino_uno_board():
         self.servo_pins = servo_pins
         self.app = None
         self.pin = None
-        self.analog_cap, self.analog_pot = self.get_sensor_value(), self.get_potentiometer_value()
+        self.analog_cap, self.analog_pot = self.get_sensor_value(), self.get_rotation_speed_value()
         self.motor_is_on = False
         self.pilot_mode = 'manual'
+        self.record_demanded = False
+        self.time_list, self.distance_list, self.rotation_list, self.bits_list = [], [], [], []
+        self.excel_names = []
+        self.path = os.path.dirname(os.path.abspath(__file__))
 
     def reload(self):
         try:
-            # On définit la carte Arduino qui est branchée sur le port COM8
+            # On définit la carte Arduino qui est branchée sur le port COM7
             self.arduinoboard = pyfirmata.Arduino(self.port)
             self.app.canvas[0].itemconfig(3,  text='Arduino branchée {}'.format(self.port), fill='green')
         except:
@@ -72,31 +81,31 @@ class Arduino_uno_board():
             self.pin['d8'].write(1)
 
     def exit(self):
-        self.arduinoboard.exit()
-
+        if self.arduinoboard != None:
+            self.arduinoboard.exit()
 
     def get_sensor_value(self):
         if self.arduinoboard != None:
             if 1 in self.analog_pins:
                 x = float(self.pin['A1'].read())
-
                 # value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931) #3/2
                 # value = float(71.36*np.exp(-(float(x)-78.2*10**(-3))/0.104)+9.445) #5/2 old
-                if x>0.43 and x<=0.6: #entre 5 et 13 cm
+                if x>0.43 and x<=0.7: #entre 5 et 13 cm
                     value = float(-24.891 * float(x) + 23.646)
-                if x>=0.15 and x<=0.43: #entre 13cm et 40cm
+                elif x>=0.15 and x<=0.43: #entre 13cm et 40cm
                     value = float(28.553 * np.exp(-(float(x) - 0.154) / 0.13) + 9.706)
-                if x>0.12 and x<0.15: #entre 40 et 50cm
+                elif x>0.12 and x<0.15: #entre 40 et 50cm
                     value = float(-520 * float(x) + 117)
-                if x>0.08 and x<=0.12: #entre 50 et 80cm
+                elif x>0.08 and x<=0.12: #entre 50 et 80cm
                     value = float(79.49 * np.exp(- (float(x) - 0.089) / 0.084762) - 0.512)
                 else:
-                    return 80
+                    value = 80
+                return value
         else:
             return 0
 
 
-    def get_potentiometer_value(self):
+    def get_rotation_speed_value(self):
         if self.arduinoboard != None:
             return self.pin['A0'].read()
         else:
@@ -129,3 +138,35 @@ class Arduino_uno_board():
         self.motor_is_forced = forced
         if self.arduinoboard != None:
             self.pin['d9'].write(int(self.app.scales[0].value)/255)
+
+    def record_mesures(self):
+        self.time_list.append(time.time())
+        self.distance_list.append(self.get_sensor_value())
+        self.rotation_list.append(self.get_rotation_speed_value())
+        self.bits_list.append(self.app.scales[0].value)
+
+    def stop_recording(self):
+        def find_file_name():
+            date = datetime.date.today().strftime("%d/%m/%Y").split('/')
+            today = str(date[0]+'-'+date[1])
+            name = str('Expérience_'+today)
+            i=1
+            if self.arduinoboard == None:
+                while str(name+'_TEST'+'('+str(i)+')') in self.excel_names: i+=1
+                name = str(name+'_TEST'+'('+str(i)+')')
+            else:
+                while str(name+'('+str(i)+')') in self.excel_names: i+=1
+                name = str(name+'('+str(i)+')')
+            self.excel_names.append(name)
+            print('will create', name)
+            return name
+
+        def console_text_back_to_normal():
+            self.app.canvas[0].itemconfig(3, text=old_text, fill=old_color)
+
+        name = find_file_name()
+        success = create_excel(self.time_list, self.distance_list, self.rotation_list, self.bits_list, self.path, name)
+        if success :
+            old_text, old_color, old_x = self.app.canvas[0].itemcget(3, 'text'), self.app.canvas[0].itemcget(3, 'fill'), self.app.canvas[0].coords(3)[0]
+            self.app.canvas[0].itemconfig(3, text=f'Fichier {name} créé', fill='green')
+            self.app.fen.after(3000, console_text_back_to_normal)

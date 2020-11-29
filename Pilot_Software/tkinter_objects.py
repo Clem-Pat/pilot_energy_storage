@@ -38,7 +38,13 @@ class tkinterButton(tk.Button):
                 self.bg, self.fg, self.cursor, self.command = "blue", 'black', "hand2", self.initialiser_potentiometres
                 self.config(command=self.command, width=16, height=2,
                             text='Init Potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor, font='Arial 11 bold')
-                self.x, self.y = 550, 460
+                self.x, self.y = 460, 460
+
+            if self.id == 4:
+                self.bg, self.fg, self.cursor, self.command = "green3", 'black', "hand2", self.experience_mode
+                self.config(command=self.command, width=16, height=2,
+                            text='Débuter Acquisition', bg=self.bg, fg=self.fg, cursor=self.cursor, font='Arial 11 bold')
+                self.x, self.y = 630, 460
 
         elif self.app.name == "init_pot":
             self.bg, self.fg, self.cursor, self.command, self.value = "grey70", 'black', "hand2", self.def_value, None
@@ -55,6 +61,21 @@ class tkinterButton(tk.Button):
 
         self.bind('<Return>', self.command)
 
+
+    def experience_mode(*args):
+        self = args[0]
+        if self.bg == 'green3':
+            self.app.board.time_list, self.app.board.distance_list, self.app.board.rotation_list, self.app.board.bits_list = [], [], [], []
+            self.app.board.record_demanded = True
+            self.bg = 'red'
+            self.config(bg=self.bg, text='Stop Acquisition')
+            self.time_list, self.distance_list, self.rotation_list = [], [], []
+
+        elif self.bg == 'red':
+            self.app.board.record_demanded = False
+            self.bg = 'green3'
+            self.config(bg=self.bg, text='Débuter Acquisition')
+            self.app.board.stop_recording()
 
 
     def def_value(*args):

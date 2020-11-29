@@ -29,7 +29,6 @@ class tkinterApp():
 
         self.L_reel = []
         self.L_capt = []
-        self.path = os.path.dirname(os.path.abspath(__file__))
 
         self.fen.bind('<Control_L>p', self.get_mouse_position)
         self.fen.geometry("{}x{}+{}+{}".format(str(self.length),
@@ -71,12 +70,12 @@ class tkinterApp():
             value = self.board.get_sensor_value()
             self.label.config(text = str(self.board.count_rounds) + ' : ' + str(self.readable_time()))
 
-            if value < 10 and self.board.rising_edge == 0:
+            if value < 9 and self.board.rising_edge == 0:
                 self.board.rising_edge = 1
                 self.board.count_rounds += 1
                 self.board.mean_tachymeter_tension_values[self.board.number_mesure] += self.board.tachymeter.read()
 
-            if value >= 10 and self.board.rising_edge == 1:
+            if value >= 9 and self.board.rising_edge == 1:
                 self.board.rising_edge = 0
 
             if self.board.count_rounds >= self.board.max_number_mesures:
@@ -92,7 +91,6 @@ class tkinterApp():
                     self.t0 = time.time()
                 else:
                     self.button.stop()
-
 
         self.fen.update()
 
@@ -163,7 +161,7 @@ class Board():
             self.rising_edge = 0
             self.mesures_duration = [0]*25
             self.mean_tachymeter_tension_values = [0]*25
-            self.max_number_mesures = 1
+            self.max_number_mesures = 5
 
             self.in3.write(1)
             self.in4.write(0)
@@ -183,14 +181,14 @@ class Board():
             # value = float(71.36*np.exp(-(float(x)-78.2*10**(-3))/0.104)+9.445) #5/2 old
             if x>0.43 and x<=0.7: #entre 5 et 13 cm
                 value = float(-24.891 * float(x) + 23.646)
-            if x>=0.15 and x<=0.43: #entre 13cm et 40cm
+            elif x>=0.15 and x<=0.43: #entre 13cm et 40cm
                 value = float(28.553 * np.exp(-(float(x) - 0.154) / 0.13) + 9.706)
-            if x>0.12 and x<0.15: #entre 40 et 50cm
+            elif x>0.12 and x<0.15: #entre 40 et 50cm
                 value = float(-520 * float(x) + 117)
-            if x>0.08 and x<=0.12: #entre 50 et 80cm
+            elif x>0.08 and x<=0.12: #entre 50 et 80cm
                 value = float(79.49 * np.exp(- (float(x) - 0.089) / 0.084762) - 0.512)
             else:
-                value = 90
+                value = 80
             return value
         else:
             return 0

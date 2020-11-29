@@ -23,7 +23,7 @@ class tkinterWindow():
             self.fen.title("Interface de pilotage du système de stockage d'énergie")
             self.fen.configure(bg="light blue")
             self.t0 = time.time()
-            self.buttons = [tkinterButton(self, i) for i in range(4)]
+            self.buttons = [tkinterButton(self, i) for i in range(5)]
             self.labels = [tkinterLabel(self, i) for i in range(2)]
             self.scales = [tkinterScale(self, i) for i in range(1)]
             self.canvas = [tkinterCanvas(self, i) for i in range(2)]
