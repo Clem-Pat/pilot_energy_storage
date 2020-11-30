@@ -1,6 +1,7 @@
 import tkinter as tk
 from pynput.mouse import Button, Controller
 import time
+import matplotlib.pyplot as plt
 
 from tkinter_objects import tkinterButton, tkinterLabel, tkinterScale, tkinterCanvas, tkinterEntry
 import main
@@ -51,8 +52,9 @@ class tkinterWindow():
         self.fen.resizable(width=False, height=False)
         self.fen.bind('<Escape>', self.destroy)
         self.fen.bind('<Control_L>r', self.reload)
-        self.fen.bind('<Control_L>p', self.get_mouse_position)
+        self.fen.bind('<Control_L>m', self.get_mouse_position)
         self.fen.bind('<Control_L><Return>', self.mouse_click)
+        self.fen.bind('<Control_L>p', self.plot_recorded_mesures)
         self.fen.bind('<question>', self.print_shortcut)
         self.fen.protocol("WM_DELETE_WINDOW", self.destroy)
 
@@ -100,7 +102,21 @@ class tkinterWindow():
         mouse.release(Button.left)
 
     def print_shortcut(*args):
-        print("Détruire l'app : echap \nRecharger l'app : ctrl+r \nAfficher la position de la souris dans l'app : ctrl+p \ncliquer : ctrl+entrée \nDémarrer/Arrêter le moteur : espace \nAide raccourcis : maj+?")
+        print("échap : Détruire l'app\nctrl+r : Recharger l'app\nctrl+m : Afficher la position de la souris dans l'app\nctrl+entrée : cliquer\nespace : Démarrer/Arrêter le moteur\nctrl+p : plot la dernière acquisition \nmaj+? : Aide raccourcis\n")
+
+    def plot_recorded_mesures(*args):
+
+        def close_plot(event):
+            if event.key == 'escape':
+                plt.close()
+
+        self = args[0]
+        plt.connect("key_press_event", close_plot)
+        plt.plot(self.board.time_list, self.board.distance_list)
+        plt.plot(self.board.time_list, self.board.rotation_list)
+        plt.plot(self.board.time_list, self.board.bits_list)
+        print(self.board.bits_list)
+        plt.show()
 
     def readable_time(self):
         t = time.time() - self.t0

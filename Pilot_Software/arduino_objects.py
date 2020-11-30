@@ -1,4 +1,4 @@
-import pyfirmata 
+import pyfirmata
 import time
 import numpy as np
 import os
@@ -6,6 +6,7 @@ import datetime
 
 from Create_excel_file import create_excel
 
+"""PB : deuxième avquisition de mesures"""
 
 """pot pin A0
 sensor pin A1
@@ -140,7 +141,7 @@ class Arduino_uno_board():
             self.pin['d9'].write(int(self.app.scales[0].value)/255)
 
     def record_mesures(self):
-        if time.time()-self.t0_record - self.time_list[-1] >= self.record_frequence:
+        if (time.time()-self.t0_record) - self.time_list[-1] >= self.record_frequence:
             self.time_list.append(time.time()-self.t0_record)
             self.distance_list.append(self.analog_cap)
             self.rotation_list.append(self.analog_pot)

@@ -5,6 +5,9 @@ import time
 import arduino_objects
 import tkinter_window
 
+"""PB : deuxième avquisition de mesures"""
+"""TO DO : un plot en direct (fenêtre en plus à part)"""
+
 """pot pin A0
 sensor pin A1
 IN3 pin d7
