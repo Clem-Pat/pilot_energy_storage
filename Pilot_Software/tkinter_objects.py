@@ -1,4 +1,4 @@
-import tkinter as tk  # module d'interface graphique
+import tkinter as tk
 from pynput.mouse import Button, Controller
 import time
 
@@ -65,17 +65,16 @@ class tkinterButton(tk.Button):
     def experience_mode(*args):
         self = args[0]
         if self.bg == 'green3':
-            self.app.board.time_list, self.app.board.distance_list, self.app.board.rotation_list, self.app.board.bits_list = [], [], [], []
+            self.app.board.t0_record, self.app.board.time_list, self.app.board.distance_list, self.app.board.rotation_list, self.app.board.bits_list = time.time(), [0.0], [self.app.board.analog_cap], [self.app.board.analog_pot], [self.app.scales[0].value]
             self.app.board.record_demanded = True
             self.bg = 'red'
             self.config(bg=self.bg, text='Stop Acquisition')
-            self.time_list, self.distance_list, self.rotation_list = [], [], []
 
         elif self.bg == 'red':
             self.app.board.record_demanded = False
+            self.app.board.stop_recording()
             self.bg = 'green3'
             self.config(bg=self.bg, text='Débuter Acquisition')
-            self.app.board.stop_recording()
 
 
     def def_value(*args):
@@ -229,15 +228,15 @@ class tkinterCanvas(tk.Canvas):
 
             self.create_text(42, 20, text='Données',
                              font="Arial 10 italic bold", fill="blue")
-            self.create_text(50, 45, text='Temps',  # 1
+            self.create_text(50, 45, text='Temps',
                              font="Arial 8 italic", fill="black")
             self.create_text(50, 70, text='',
                              font="Arial 8 italic", fill="black")
-            self.create_text(150, 45, text='Potentiomètre',  # 2
+            self.create_text(150, 45, text='Potentiomètre',
                              font="Arial 8 italic", fill="black")
             self.create_text(150, 70, text='',
                              font="Arial 8 italic", fill="black")
-            self.create_text(250, 45, text='Distance',  # 3
+            self.create_text(250, 45, text='Distance',
                              font="Arial 8 italic", fill="black")
             self.create_text(250, 70, text='',
                              font="Arial 8 italic", fill="black")

@@ -1,4 +1,4 @@
-import tkinter as tk  #module d'interface graphique
+import tkinter as tk
 from pynput.mouse import Button, Controller
 import time
 
@@ -37,7 +37,7 @@ class tkinterWindow():
 
 
         elif self.name == "init_pot":
-            self.x, self.y = 10, 50  # positions de la fenetre
+            self.x, self.y = 10, 50
             self.center_position = (316 + self.x, 236 + self.y)
             self.length, self.height = 650, 500
             self.fen.title("Initialisation potentiomètres")
@@ -91,7 +91,6 @@ class tkinterWindow():
         print('Position : {}'.format(position))
 
     def mouse_click(*args, position = None):
-        #si on ne force pas la souris à se déplacer (en précisant l'arg position), elle cliquera à l'endroit où elle se trouve
         self = args[0]
         mouse = Controller()
         if position == None:
@@ -116,14 +115,14 @@ class tkinterWindow():
     def update(self):
         if self.name == "main":
             self.canvas[1].itemconfig(3, text=self.readable_time())
-            self.canvas[1].itemconfig(5, text="{:.3f}".format(self.board.analog_pot)) # Valeur rendue par le potentiomètre avec que 3 décimales
-            self.canvas[1].itemconfig(7, text="{:.3f}".format(self.board.analog_cap)) # Valeur rendue par le capteur de distance avec que 3 décimales
+            self.canvas[1].itemconfig(5, text="{:.3f}".format(self.board.analog_pot)) #avec que 3 décimales
+            self.canvas[1].itemconfig(7, text="{:.3f}".format(self.board.analog_cap))
 
             if self.init_pot_app != None:
                 try:
                     self.init_pot_app.update()
                 except:
-                    self.init_pot_app = None    #the init_pot_app has been destroyed with red cross
+                    self.init_pot_app = None
 
         elif self.name == "init_pot":
             if self.parent_app.particular_pot_value[0] == None :

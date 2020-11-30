@@ -1,4 +1,4 @@
-import pyfirmata  # module de communication avec la carte Arduino
+import pyfirmata 
 import time
 import numpy as np
 import os
@@ -31,13 +31,13 @@ class Arduino_uno_board():
         self.motor_is_on = False
         self.pilot_mode = 'manual'
         self.record_demanded = False
-        self.time_list, self.distance_list, self.rotation_list, self.bits_list = [], [], [], []
-        self.excel_names = []
+        self.record_frequence = 0.001 #fréquence d'acquisition en secondes
+        self.t0_record, self.time_list, self.distance_list, self.rotation_list, self.bits_list = 0, [], [], [], []
+        self.excel_names_already_used = []
         self.path = os.path.dirname(os.path.abspath(__file__))
 
     def reload(self):
         try:
-            # On définit la carte Arduino qui est branchée sur le port COM7
             self.arduinoboard = pyfirmata.Arduino(self.port)
             self.app.canvas[0].itemconfig(3,  text='Arduino branchée {}'.format(self.port), fill='green')
         except:
@@ -85,6 +85,7 @@ class Arduino_uno_board():
             self.arduinoboard.exit()
 
     def get_sensor_value(self):
+        """grâce à étude du capteur de distance Sensor_study"""
         if self.arduinoboard != None:
             if 1 in self.analog_pins:
                 x = float(self.pin['A1'].read())
@@ -106,22 +107,21 @@ class Arduino_uno_board():
 
 
     def get_rotation_speed_value(self):
+        """Grâce aux études de capteurs Tachymeter_study, et Violette's study"""
         if self.arduinoboard != None:
-            return self.pin['A0'].read()
+            return 376.64*self.pin['A0'].read() + 288.92 #Violette's study
         else:
             return 0
 
 
     def change_motor_rotation(self, rotation_direction):
         if self.arduinoboard != None:
-            #sens de rotation :
             if rotation_direction == 'direct':
                 self.pin['d7'].write(0)
                 self.pin['d8'].write(1)
             elif rotation_direction == 'indirect':
                 self.pin['d7'].write(1)
                 self.pin['d8'].write(0)
-
 
     def change_motor_speed(self, value):
         if self.arduinoboard != None and self.motor_is_on:
@@ -140,10 +140,11 @@ class Arduino_uno_board():
             self.pin['d9'].write(int(self.app.scales[0].value)/255)
 
     def record_mesures(self):
-        self.time_list.append(time.time())
-        self.distance_list.append(self.get_sensor_value())
-        self.rotation_list.append(self.get_rotation_speed_value())
-        self.bits_list.append(self.app.scales[0].value)
+        if time.time()-self.t0_record - self.time_list[-1] >= self.record_frequence:
+            self.time_list.append(time.time()-self.t0_record)
+            self.distance_list.append(self.analog_cap)
+            self.rotation_list.append(self.analog_pot)
+            self.bits_list.append(self.app.scales[0].value)
 
     def stop_recording(self):
         def find_file_name():
@@ -152,12 +153,12 @@ class Arduino_uno_board():
             name = str('Expérience_'+today)
             i=1
             if self.arduinoboard == None:
-                while str(name+'_TEST'+'('+str(i)+')') in self.excel_names: i+=1
+                while str(name+'_TEST'+'('+str(i)+')') in self.excel_names_already_used: i+=1
                 name = str(name+'_TEST'+'('+str(i)+')')
             else:
-                while str(name+'('+str(i)+')') in self.excel_names: i+=1
+                while str(name+'('+str(i)+')') in self.excel_names_already_used: i+=1
                 name = str(name+'('+str(i)+')')
-            self.excel_names.append(name)
+            self.excel_names_already_used.append(name)
             print('will create', name)
             return name
 
@@ -170,3 +171,5 @@ class Arduino_uno_board():
             old_text, old_color, old_x = self.app.canvas[0].itemcget(3, 'text'), self.app.canvas[0].itemcget(3, 'fill'), self.app.canvas[0].coords(3)[0]
             self.app.canvas[0].itemconfig(3, text=f'Fichier {name} créé', fill='green')
             self.app.fen.after(3000, console_text_back_to_normal)
+        else:
+            print('FAILED !')

@@ -1,5 +1,5 @@
-import tkinter as tk  #module d'interface graphique
-import pyfirmata    #module de communication avec la carte Arduino
+import tkinter as tk
+import pyfirmata
 import time
 
 import arduino_objects
@@ -14,8 +14,8 @@ ENB pin d9"""
 
 
 def main():
-    board = arduino_objects.Arduino_uno_board('COM7', analogs=[0,1], output_pins=[7,8], pwm_pins=[9]) #Définir la carte arduino et les 3 pins avec lesquelles on communique.
-    app = tkinter_window.tkinterWindow('main', board) #Créer la fenêtre
+    board = arduino_objects.Arduino_uno_board('COM7', analogs=[0,1], output_pins=[7,8], pwm_pins=[9])
+    app = tkinter_window.tkinterWindow('main', board)
 
     while True:
         board.analog_pot = board.get_rotation_speed_value()
