@@ -1,6 +1,7 @@
 import tkinter as tk
 import pyfirmata
 import time
+import matplotlib.pyplot as plt
 
 import arduino_objects
 import tkinter_window
@@ -23,6 +24,7 @@ def main():
     while True:
         board.analog_pot = board.get_rotation_speed_value()
         board.analog_cap = board.get_sensor_value()
+        board.record_mesures()
 
         if board.pilot_mode == 'auto' :
             if board.motor_is_on and board.analog_cap < 10 :
@@ -30,15 +32,11 @@ def main():
             if not board.motor_is_on and board.analog_cap >= 10 and not board.motor_is_forced:
                 board.start_motor()
 
-        if board.record_demanded == True:
-            board.record_mesures()
-
         try:
             app.update()
         except:
             board.exit()
             break
-
 
 if __name__ == "__main__":
     main()

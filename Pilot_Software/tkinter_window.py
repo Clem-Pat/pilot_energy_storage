@@ -1,7 +1,10 @@
 import tkinter as tk
 from pynput.mouse import Button, Controller
 import time
-import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+# import matplotlib.pyplot as plt
+import numpy as np
 
 from tkinter_objects import tkinterButton, tkinterLabel, tkinterScale, tkinterCanvas, tkinterEntry
 import main
@@ -15,15 +18,15 @@ class tkinterWindow():
         self.name = name_of_application
         self.board = board
         self.init_pot_app = init_pot_app
+        self.plot_app = None
         self.parent_app = parent_app
+        self.t0 = time.time()
 
         if self.name == 'main':
-            self.x, self.y = 450, 0
-            self.center_position = (424 + self.x, 310 + self.y)
+            self.x, self.y = 470, 0
             self.length, self.height = 800, 800
             self.fen.title("Interface de pilotage du système de stockage d'énergie")
             self.fen.configure(bg="light blue")
-            self.t0 = time.time()
             self.buttons = [tkinterButton(self, i) for i in range(5)]
             self.labels = [tkinterLabel(self, i) for i in range(2)]
             self.scales = [tkinterScale(self, i) for i in range(1)]
@@ -35,11 +38,10 @@ class tkinterWindow():
             self.board.reload()
             self.fen.bind('<space>', self.buttons[2].motor_start_stop)
             self.particular_pot_value = [None, None]
-
+            self.plot_demanded = False
 
         elif self.name == "init_pot":
             self.x, self.y = 10, 50
-            self.center_position = (316 + self.x, 236 + self.y)
             self.length, self.height = 650, 500
             self.fen.title("Initialisation potentiomètres")
             self.fen.configure(bg="grey70")
@@ -47,20 +49,30 @@ class tkinterWindow():
             self.labels = [tkinterLabel(self, i) for i in range(3)]
             self.objects = [self.buttons, self.labels]
 
-        self.fen.geometry("{}x{}+{}+{}".format(str(self.length),
-                                               str(self.height), str(self.x), str(self.y)))
+        elif self.name == "plot_app":
+            self.x, self.y = -10,0
+            self.length, self.height = 480, 650
+            self.fen.title("plot mesures")
+            self.objects = []
+            self.figures, self.axes = [0]*10, [0]*10
+            self.color = ["b", "r", "g", "c", "m", "y", "k"]
+            self.data_plot = ["dist", "rot", "speed", "motor_on"]
+
+
+        self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
+        self.fen.geometry("{}x{}+{}+{}".format(str(self.length),str(self.height), str(self.x), str(self.y)))
         self.fen.resizable(width=False, height=False)
         self.fen.bind('<Escape>', self.destroy)
         self.fen.bind('<Control_L>r', self.reload)
         self.fen.bind('<Control_L>m', self.get_mouse_position)
         self.fen.bind('<Control_L><Return>', self.mouse_click)
-        self.fen.bind('<Control_L>p', self.plot_recorded_mesures)
+        self.fen.bind('<Control_L>p', self.demand_plot)
         self.fen.bind('<question>', self.print_shortcut)
         self.fen.protocol("WM_DELETE_WINDOW", self.destroy)
 
         self.place_all_objects()
         self.update()
-        self.mouse_click(position = self.center_position)
+        if self.name != "plot_app" : self.mouse_click(position = self.center_position)
 
 
     def reload(*args):
@@ -71,19 +83,90 @@ class tkinterWindow():
         except: pass
         main.main()
 
+    def demand_plot(*args):
+        self = args[0]
+        if self.name == "main":
+            self.plot_demanded = not self.plot_demanded
+            self.plot_app = tkinterWindow("plot_app", self.board, parent_app=self)
+
+    def plot_mesures(*args):
+        def plot(plot_app, x_axis, y_axis_list):
+            for i in range(len(y_axis_list)):
+                plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=100)
+                plot_app.axes[i] = plot_app.figures[i].add_subplot(111)
+                plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_plot[i], marker="+", ls='-')
+                plot_app.axes[i].legend(loc='best', shadow=True, fontsize='small', markerscale=0.4)   #Ajouter une légende qui s'affiche au mieux sur le graphe
+                try:
+                    graph = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app.fen)
+                    canvas = graph.get_tk_widget()
+                    canvas.place(x=0,y=160*i)
+                except:
+                    pass
+            plot_app.axes[0].set(xlabel='temps (s)')
+
+        self = args[0]
+        plot(self, self.board.time_list_plot, [self.board.distance_list_plot, self.board.rotation_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot])
+
+    def readable_time(self):
+        t = time.time() - self.t0
+        temps_tuple = time.gmtime(t)
+        reste = t - temps_tuple[3] * 3600.0 - temps_tuple[4] * \
+            60.0 - temps_tuple[5] * 1.0  # on récupère le reste
+        reste = ("%.2f" % reste)[-2::]
+        tt = time.strftime("%H:%M:%S", temps_tuple) + "," + reste
+        return tt
+
+    def update(self):
+        if self.name == "main":
+            self.canvas[1].itemconfig(3, text=self.readable_time())
+            self.canvas[1].itemconfig(5, text="{:.3f}".format(self.board.analog_pot)) #avec que 3 décimales
+            self.canvas[1].itemconfig(7, text="{:.3f}".format(self.board.analog_cap))
+
+            if self.init_pot_app != None:
+                try:self.init_pot_app.update()
+                except:self.init_pot_app = None
+            if self.plot_app != None:
+                try:self.plot_app.update()
+                except:self.plot_app = None
+
+        elif self.name == "init_pot":
+            if self.parent_app.particular_pot_value[0] == None :
+                self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.analog_pot))
+            if self.parent_app.particular_pot_value[1] == None :
+                self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.analog_pot))
+
+        elif self.name == "plot_app":
+            if self.parent_app.plot_demanded:
+                self.plot_mesures()
+
+        self.fen.update()
+
+    def place_all_objects(self):
+        for list_objects in self.objects:
+            for object in list_objects:
+                object.place(x=object.x, y=object.y)
+
     def destroy(*args):
         self = args[0]
-
         if str(self.fen.focus_get())[:14] == '.!tkinterentry' or str(self.fen.focus_get())[:15] == '.!tkinterbutton':
             self.fen.focus_get().unfocus()
-
         else:
-            if self.init_pot_app != None:
-                try: self.init_pot_app.fen.destroy()
-                except: pass
-                self.init_pot_app = None
-            if self.parent_app != None:
+            if self.name == 'main':
+                if self.init_pot_app != None:
+                    try: self.init_pot_app.fen.destroy()
+                    except: pass
+                    self.init_pot_app = None
+                if self.plot_app != None:
+                    try: self.plot_app.fen.destroy()
+                    except: pass
+                    self.plot_app = None
+
+            if self.name == "init_pot_app":
                 self.parent_app.init_pot_app = None
+
+            if self.name == "plot_app":
+                self.parent_app.plot_demanded = False
+                self.parent_app.plot_app = None
             self.fen.destroy()
 
     def get_mouse_position(*args):
@@ -103,52 +186,3 @@ class tkinterWindow():
 
     def print_shortcut(*args):
         print("échap : Détruire l'app\nctrl+r : Recharger l'app\nctrl+m : Afficher la position de la souris dans l'app\nctrl+entrée : cliquer\nespace : Démarrer/Arrêter le moteur\nctrl+p : plot la dernière acquisition \nmaj+? : Aide raccourcis\n")
-
-    def plot_recorded_mesures(*args):
-
-        def close_plot(event):
-            if event.key == 'escape':
-                plt.close()
-
-        self = args[0]
-        plt.connect("key_press_event", close_plot)
-        plt.plot(self.board.time_list, self.board.distance_list)
-        plt.plot(self.board.time_list, self.board.rotation_list)
-        plt.plot(self.board.time_list, self.board.bits_list)
-        print(self.board.bits_list)
-        plt.show()
-
-    def readable_time(self):
-        t = time.time() - self.t0
-        temps_tuple = time.gmtime(t)
-        reste = t - temps_tuple[3] * 3600.0 - temps_tuple[4] * \
-            60.0 - temps_tuple[5] * 1.0  # on récupère le reste
-        # Affiche les dixièmes et centièmes de l'arrondi
-        reste = ("%.2f" % reste)[-2::]
-        tt = time.strftime("%H:%M:%S", temps_tuple) + "," + reste
-        return tt
-
-    def update(self):
-        if self.name == "main":
-            self.canvas[1].itemconfig(3, text=self.readable_time())
-            self.canvas[1].itemconfig(5, text="{:.3f}".format(self.board.analog_pot)) #avec que 3 décimales
-            self.canvas[1].itemconfig(7, text="{:.3f}".format(self.board.analog_cap))
-
-            if self.init_pot_app != None:
-                try:
-                    self.init_pot_app.update()
-                except:
-                    self.init_pot_app = None
-
-        elif self.name == "init_pot":
-            if self.parent_app.particular_pot_value[0] == None :
-                self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.analog_pot))
-            if self.parent_app.particular_pot_value[1] == None :
-                self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.analog_pot))
-
-        self.fen.update()
-
-    def place_all_objects(self):
-        for list_objects in self.objects:
-            for object in list_objects:
-                object.place(x=object.x, y=object.y)

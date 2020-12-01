@@ -65,7 +65,7 @@ class tkinterButton(tk.Button):
     def experience_mode(*args):
         self = args[0]
         if self.bg == 'green3':
-            self.app.board.t0_record, self.app.board.time_list, self.app.board.distance_list, self.app.board.rotation_list, self.app.board.bits_list = time.time(), [0.0], [self.app.board.analog_cap], [self.app.board.analog_pot], [self.app.scales[0].value]
+            self.app.board.t0_record, self.app.board.time_list, self.app.board.distance_list, self.app.board.rotation_list, self.app.board.bits_list, self.app.board.motor_is_on_list = time.time(), [0.0], [self.app.board.analog_cap], [self.app.board.analog_pot], [self.app.scales[0].value], [int(self.app.board.motor_is_on)]
             self.app.board.record_demanded = True
             self.bg = 'red'
             self.config(bg=self.bg, text='Stop Acquisition')
