@@ -1,0 +1,3 @@
+- module Python profile pour analyser la complexité des fonctions : cProfile
+(besoin car le plot des data est gourmand en temps de calculs)
+  

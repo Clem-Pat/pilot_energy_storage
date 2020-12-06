@@ -56,7 +56,8 @@ class tkinterWindow():
             self.objects = []
             self.figures, self.axes = [0]*10, [0]*10
             self.color = ["b", "r", "g", "c", "m", "y", "k"]
-            self.data_plot = ["dist", "rot", "speed", "motor_on"]
+            self.data_to_plot_name = ["dist", "rot", "speed", "motor_on"]
+            self.data_to_plot = [self.board.distance_list_plot, self.board.rotation_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
 
 
         self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
@@ -87,25 +88,28 @@ class tkinterWindow():
         self = args[0]
         if self.name == "main":
             self.plot_demanded = not self.plot_demanded
-            self.plot_app = tkinterWindow("plot_app", self.board, parent_app=self)
+            if self.plot_demanded:
+                self.plot_app = tkinterWindow("plot_app", self.board, parent_app=self)
+            else:
+                self.plot_app.destroy()
 
     def plot_mesures(*args):
         def plot(plot_app, x_axis, y_axis_list):
             for i in range(len(y_axis_list)):
                 plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=100)
                 plot_app.axes[i] = plot_app.figures[i].add_subplot(111)
-                plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_plot[i], marker="+", ls='-')
+                plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_to_plot_name[i], marker="+", ls='-')
                 plot_app.axes[i].legend(loc='best', shadow=True, fontsize='small', markerscale=0.4)   #Ajouter une légende qui s'affiche au mieux sur le graphe
                 try:
-                    graph = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app.fen)
-                    canvas = graph.get_tk_widget()
+                    canvas = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app.fen).get_tk_widget()
                     canvas.place(x=0,y=160*i)
                 except:
                     pass
             plot_app.axes[0].set(xlabel='temps (s)')
+            plot_app.fen.update()
 
         self = args[0]
-        plot(self, self.board.time_list_plot, [self.board.distance_list_plot, self.board.rotation_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot])
+        plot(self, self.board.time_list_plot, self.data_to_plot)
 
     def readable_time(self):
         t = time.time() - self.t0
@@ -125,19 +129,12 @@ class tkinterWindow():
             if self.init_pot_app != None:
                 try:self.init_pot_app.update()
                 except:self.init_pot_app = None
-            if self.plot_app != None:
-                try:self.plot_app.update()
-                except:self.plot_app = None
 
         elif self.name == "init_pot":
             if self.parent_app.particular_pot_value[0] == None :
                 self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.analog_pot))
             if self.parent_app.particular_pot_value[1] == None :
                 self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.analog_pot))
-
-        elif self.name == "plot_app":
-            if self.parent_app.plot_demanded:
-                self.plot_mesures()
 
         self.fen.update()
 

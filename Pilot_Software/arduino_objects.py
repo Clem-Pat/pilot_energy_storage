@@ -160,14 +160,15 @@ class Arduino_uno_board():
             self.rotation_list_plot.append(self.analog_pot)
             self.bits_list_plot.append(self.app.scales[0].value)
             self.motor_is_on_list_plot.append(int(self.motor_is_on))
+            if len(self.time_list_plot) > 30:
+                self.time_list_plot.pop(0)
+                self.distance_list_plot.pop(0)
+                self.rotation_list_plot.pop(0)
+                self.bits_list_plot.pop(0)
+                self.motor_is_on_list_plot.pop(0)
 
-
-        if len(self.time_list_plot) > 30:
-            self.time_list_plot.pop(0)
-            self.distance_list_plot.pop(0)
-            self.rotation_list_plot.pop(0)
-            self.bits_list_plot.pop(0)
-            self.motor_is_on_list_plot.pop(0)
+            if self.app.plot_app != None:
+                self.app.plot_app.plot_mesures()
 
     def stop_recording(self):
         def find_file_name():
