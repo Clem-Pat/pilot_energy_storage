@@ -1,3 +1,5 @@
 - module Python profile pour analyser la complexité des fonctions : cProfile
 (besoin car le plot des data est gourmand en temps de calculs)
-  
+    #### Fonction par fonction
+
+- ajouter un élément dans la console exhibant les FPS (et mettant en avant la comparaison entre les FPS et la fréquence d'acquisition)
