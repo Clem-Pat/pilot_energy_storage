@@ -33,7 +33,7 @@ class Arduino_uno_board():
         self.motor_is_on = False
         self.pilot_mode = 'manual'
         self.record_demanded = False
-        self.record_frequence = 0.1  # fréquence d'acquisition en secondes
+        self.record_period = 0.1  # période d'acquisition en secondes
         self.t0_record, self.time_list, self.distance_list, self.rotation_list, self.bits_list, self.motor_is_on_list = time.time(), [0.0], [self.analog_cap], [self.analog_pot], [0], [int(self.motor_is_on)]
         self.time_list_plot, self.distance_list_plot, self.rotation_list_plot, self.bits_list_plot, self.motor_is_on_list_plot = [0], [self.analog_cap], [self.analog_pot], [0], [int(self.motor_is_on)]
         self.excel_names_already_used = []
@@ -147,14 +147,14 @@ class Arduino_uno_board():
 
     def record_mesures(self):
         if self.record_demanded == True:
-            if (time.time() - self.t0_record) - self.time_list[-1] >= self.record_frequence:
+            if (time.time() - self.t0_record) - self.time_list[-1] >= self.record_period:
                 self.time_list.append(time.time() - self.t0_record)
                 self.distance_list.append(self.analog_cap)
                 self.rotation_list.append(self.analog_pot)
                 self.bits_list.append(self.app.scales[0].value)
                 self.motor_is_on_list.append(int(self.motor_is_on))
 
-        if (time.time() - self.app.t0) - self.time_list_plot[-1] >= self.record_frequence:
+        if (time.time() - self.app.t0) - self.time_list_plot[-1] >= self.record_period:
             self.time_list_plot.append(time.time() - self.app.t0)
             self.distance_list_plot.append(self.analog_cap)
             self.rotation_list_plot.append(self.analog_pot)
@@ -185,7 +185,7 @@ class Arduino_uno_board():
                     i += 1
                 name = str(name + '(' + str(i) + ')')
             self.excel_names_already_used.append(name)
-            print('will create', name)
+            print('will create', name, f'{len(self.time_list)} values')
             return name
 
         def console_text_back_to_normal():
@@ -195,10 +195,8 @@ class Arduino_uno_board():
         success = create_excel(self.time_list, self.distance_list, self.rotation_list,
                                self.bits_list, self.motor_is_on_list, self.path, name)
         if success:
-            old_text, old_color, old_x = self.app.canvas[0].itemcget(
-                3, 'text'), self.app.canvas[0].itemcget(3, 'fill'), self.app.canvas[0].coords(3)[0]
-            self.app.canvas[0].itemconfig(
-                3, text=f'Fichier {name} créé', fill='green')
+            old_text, old_color, old_x = self.app.canvas[0].itemcget(3, 'text'), self.app.canvas[0].itemcget(3, 'fill'), self.app.canvas[0].coords(3)[0]
+            self.app.canvas[0].itemconfig(3, text=f'Fichier {name} créé', fill='green')
             self.app.fen.after(3000, console_text_back_to_normal)
         else:
             print('FAILED !')

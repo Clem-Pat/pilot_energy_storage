@@ -46,7 +46,7 @@ class tkinterButton(tk.Button):
                             text='Débuter Acquisition', bg=self.bg, fg=self.fg, cursor=self.cursor, font='Arial 11 bold')
                 self.x, self.y = 630, 460
 
-        elif self.app.name == "init_pot":
+        elif self.app.name == "init_pot_app":
             self.bg, self.fg, self.cursor, self.command, self.value = "grey70", 'black', "hand2", self.def_value, None
 
             if self.id == 0:
@@ -88,7 +88,7 @@ class tkinterButton(tk.Button):
         self = args[0]
         if self.app.init_pot_app == None:
             init_pot_app = tkinter_window.tkinterWindow(
-                "init_pot", self.app.board, parent_app=self.app)
+                "init_pot_app", self.app.board, parent_app=self.app)
             self.app.init_pot_app = init_pot_app
             init_pot_app.place_all_objects()
         else:
@@ -157,7 +157,7 @@ class tkinterLabel(tk.Label):
                             fg='blue', width=20, font='Arial 20')
                 self.x, self.y = 240, 385
 
-        elif self.app.name == 'init_pot':
+        elif self.app.name == 'init_pot_app':
             if self.id == 0:
                 self.config(text='Initialisation du potentiomètre', bg='grey70',
                             fg='black', font='Impact 30 bold')
@@ -217,10 +217,12 @@ class tkinterCanvas(tk.Canvas):
                              font="Arial 10 italic bold", fill="blue")
             self.create_text(56, 57, text=' ',
                              font="Arial 10 italic bold", fill="black")
-            self.create_text(110, 40, text='Pas de carte Arduino branchée',
+            self.create_text(110, 45, text='Pas de carte Arduino branchée',
                              font="Arial 10 italic bold", fill="red")
             self.create_text(570, 20, text=self.app.board.port,
                              font="Arial 10 italic bold", fill="black")
+            self.create_text(550, 45, text=f'FPS : {self.app.fps}',
+                             font="Arial 10 italic bold", fill="grey70")
 
         elif self.id == 1:
             self.config(bg="white", height=100, width=300, relief='raised')
@@ -232,7 +234,7 @@ class tkinterCanvas(tk.Canvas):
                              font="Arial 8 italic", fill="black")
             self.create_text(50, 70, text='',
                              font="Arial 8 italic", fill="black")
-            self.create_text(150, 45, text='Potentiomètre',
+            self.create_text(150, 45, text='Vitesse angulaire',
                              font="Arial 8 italic", fill="black")
             self.create_text(150, 70, text='',
                              font="Arial 8 italic", fill="black")

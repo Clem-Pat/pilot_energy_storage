@@ -1,6 +1,6 @@
 import tkinter as tk
-from pynput.mouse import Button, Controller
 import time
+from pynput.mouse import Button, Controller
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # import matplotlib.pyplot as plt
@@ -21,6 +21,9 @@ class tkinterWindow():
         self.plot_app = None
         self.parent_app = parent_app
         self.t0 = time.time()
+        self.last_tick_t = time.time()
+        self.fps = 1
+        self.tick = 0
 
         if self.name == 'main':
             self.x, self.y = 470, 0
@@ -40,7 +43,7 @@ class tkinterWindow():
             self.particular_pot_value = [None, None]
             self.plot_demanded = False
 
-        elif self.name == "init_pot":
+        elif self.name == "init_pot_app":
             self.x, self.y = 10, 50
             self.length, self.height = 650, 500
             self.fen.title("Initialisation potentiomètres")
@@ -59,22 +62,19 @@ class tkinterWindow():
             self.data_to_plot_name = ["dist", "rot", "speed", "motor_on"]
             self.data_to_plot = [self.board.distance_list_plot, self.board.rotation_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
 
-
         self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
         self.fen.geometry("{}x{}+{}+{}".format(str(self.length),str(self.height), str(self.x), str(self.y)))
         self.fen.resizable(width=False, height=False)
         self.fen.bind('<Escape>', self.destroy)
         self.fen.bind('<Control_L>r', self.reload)
         self.fen.bind('<Control_L>m', self.get_mouse_position)
-        self.fen.bind('<Control_L><Return>', self.mouse_click)
         self.fen.bind('<Control_L>p', self.demand_plot)
         self.fen.bind('<question>', self.print_shortcut)
         self.fen.protocol("WM_DELETE_WINDOW", self.destroy)
 
         self.place_all_objects()
         self.update()
-        if self.name != "plot_app" : self.mouse_click(position = self.center_position)
-
+        self.mouse_click(position = self.center_position)
 
     def reload(*args):
         self = args[0]
@@ -120,6 +120,17 @@ class tkinterWindow():
         tt = time.strftime("%H:%M:%S", temps_tuple) + "," + reste
         return tt
 
+    def get_and_update_fps(self):
+        t = time.time()
+        if t-self.last_tick_t >= 0.5:
+            self.fps = int(self.tick/(t-self.last_tick_t))
+            if self.fps < 1/self.board.record_period:
+                self.canvas[0].itemconfig(5, text=f"FPS : {self.fps} < f_acq !", fill='red')
+            else:
+                self.canvas[0].itemconfig(5, text=f'FPS : {self.fps}', fill='grey70')
+            self.last_tick_t = time.time()
+            self.tick = 0
+
     def update(self):
         if self.name == "main":
             self.canvas[1].itemconfig(3, text=self.readable_time())
@@ -130,12 +141,15 @@ class tkinterWindow():
                 try:self.init_pot_app.update()
                 except:self.init_pot_app = None
 
-        elif self.name == "init_pot":
+        elif self.name == "init_pot_app":
             if self.parent_app.particular_pot_value[0] == None :
                 self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.analog_pot))
             if self.parent_app.particular_pot_value[1] == None :
                 self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.analog_pot))
 
+        self.tick += 1
+        if self.name == 'main':
+            self.get_and_update_fps()
         self.fen.update()
 
     def place_all_objects(self):
@@ -149,22 +163,23 @@ class tkinterWindow():
             self.fen.focus_get().unfocus()
         else:
             if self.name == 'main':
+                if self.plot_app == None and self.init_pot_app == None:
+                    self.fen.destroy()
                 if self.init_pot_app != None:
-                    try: self.init_pot_app.fen.destroy()
-                    except: pass
-                    self.init_pot_app = None
+                    self.init_pot_app.destroy()
                 if self.plot_app != None:
-                    try: self.plot_app.fen.destroy()
-                    except: pass
-                    self.plot_app = None
+                    self.plot_app.destroy()
 
             if self.name == "init_pot_app":
+                try: self.fen.destroy()
+                except: pass
                 self.parent_app.init_pot_app = None
 
             if self.name == "plot_app":
+                try: self.fen.destroy()
+                except: pass
                 self.parent_app.plot_demanded = False
                 self.parent_app.plot_app = None
-            self.fen.destroy()
 
     def get_mouse_position(*args):
         self = args[0]
@@ -180,6 +195,11 @@ class tkinterWindow():
         mouse.position = position
         mouse.press(Button.left)
         mouse.release(Button.left)
+
+        if self.name == 'plot_app':
+            mouse.position = self.parent_app.center_position
+            mouse.press(Button.left)
+            mouse.release(Button.left)
 
     def print_shortcut(*args):
         print("échap : Détruire l'app\nctrl+r : Recharger l'app\nctrl+m : Afficher la position de la souris dans l'app\nctrl+entrée : cliquer\nespace : Démarrer/Arrêter le moteur\nctrl+p : plot la dernière acquisition \nmaj+? : Aide raccourcis\n")
