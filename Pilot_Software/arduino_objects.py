@@ -172,28 +172,42 @@ class Arduino_uno_board():
 
     def stop_recording(self):
         def find_file_name():
+            title = 'Expérience_'
+
             date = datetime.date.today().strftime("%d/%m/%Y").split('/')
             today = str(date[0] + '-' + date[1])
-            name = str('Expérience_' + today)
+
+            if self.app.entrys[1]['fg'] == 'green': comment = '_' + str(self.app.entrys[1].get())
+            else: comment = ''
+
+            name = str(title + today + comment)
+
             i = 1
             if self.arduinoboard == None:
-                while str(name + '_TEST' + '(' + str(i) + ')') in self.excel_names_already_used:
-                    i += 1
+                while str(name + '_TEST' + '(' + str(i) + ')') in self.excel_names_already_used: i += 1
                 name = str(name + '_TEST' + '(' + str(i) + ')')
             else:
-                while str(name + '(' + str(i) + ')') in self.excel_names_already_used:
-                    i += 1
+                while str(name + '(' + str(i) + ')') in self.excel_names_already_used: i += 1
                 name = str(name + '(' + str(i) + ')')
             self.excel_names_already_used.append(name)
             print('will create', name, f'{len(self.time_list)} values')
             return name
 
+        def find_file_path():
+            date = datetime.date.today().strftime("%d/%m/%Y").split('/')
+            today = str(date[0] + '-' + date[1])
+            folder_path = self.path + '/' + today
+            try: os.mkdir(folder_path) #si le dossier n'existe pas on le crée
+            except FileExistsError: pass #si le dossier existe déjà on ne fait rien
+            return folder_path
+
         def console_text_back_to_normal():
             self.app.canvas[0].itemconfig(3, text=old_text, fill=old_color)
 
+        path = find_file_path()
         name = find_file_name()
         success = create_excel(self.time_list, self.distance_list, self.rotation_list,
-                               self.bits_list, self.motor_is_on_list, self.path, name)
+                               self.bits_list, self.motor_is_on_list, path, name)
         if success:
             old_text, old_color, old_x = self.app.canvas[0].itemcget(3, 'text'), self.app.canvas[0].itemcget(3, 'fill'), self.app.canvas[0].coords(3)[0]
             self.app.canvas[0].itemconfig(3, text=f'Fichier {name} créé', fill='green')

@@ -34,7 +34,7 @@ class tkinterWindow():
             self.labels = [tkinterLabel(self, i) for i in range(2)]
             self.scales = [tkinterScale(self, i) for i in range(1)]
             self.canvas = [tkinterCanvas(self, i) for i in range(2)]
-            self.entrys = [tkinterEntry(self, i) for i in range(1)]
+            self.entrys = [tkinterEntry(self, i) for i in range(2)]
             self.objects = [self.buttons, self.labels, self.scales, self.canvas, self.entrys]
 
             self.board.app = self

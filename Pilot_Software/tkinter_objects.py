@@ -7,7 +7,6 @@ import tkinter_window
 
 class tkinterButton(tk.Button):
     """Créer les boutons de commande"""
-
     def __init__(self, application, id):
         tk.Button.__init__(self, application.fen)
 
@@ -61,7 +60,6 @@ class tkinterButton(tk.Button):
 
         self.bind('<Return>', self.command)
 
-
     def experience_mode(*args):
         self = args[0]
         if self.bg == 'green3':
@@ -76,13 +74,11 @@ class tkinterButton(tk.Button):
             self.bg = 'green3'
             self.config(bg=self.bg, text='Débuter Acquisition')
 
-
     def def_value(*args):
         self = args[0]
         if self.app.board.arduinoboard != None:
             self.app.parent_app.particular_pot_value[self.id] = self.app.board.pin["A0"].read()
         self.config(bg='grey80', fg='grey50', state=tk.DISABLED)
-
 
     def initialiser_potentiometres(*args):
         self = args[0]
@@ -93,7 +89,6 @@ class tkinterButton(tk.Button):
             init_pot_app.place_all_objects()
         else:
             self.app.mouse_click(position = self.app.init_pot_app.center_position)
-
 
     def motor_direction(*args):
         self = args[0]
@@ -106,7 +101,6 @@ class tkinterButton(tk.Button):
             self.config(text="La rotation est\ndirecte", bg=self.bg)
             self.app.board.change_motor_rotation('direct')
 
-
     def motor_start_stop(*args):
         self = args[0]
 
@@ -118,7 +112,6 @@ class tkinterButton(tk.Button):
             self.bg = 'green3'
             self.config(text="Démarrer le moteur", bg=self.bg)
             self.app.board.stop_motor(forced=True)
-
 
     def def_pilote_mode(*args):
         self = args[0]
@@ -264,22 +257,40 @@ class tkinterEntry(tk.Entry):
                 self.bind_all('<Key>', self.type)
                 self.x, self.y = 55, 330
 
+            if self.id == 1:
+                self.config(width=15, font='Arial 12', fg='grey')
+                self.insert(0, 'Commentaires')
+                self.bind('<Return>', self.enter)
+                self.bind('<Button-1>', self.type)
+                self.bind_all('<Key>', self.type)
+                self.x, self.y = 630, 522
 
     def enter(self, state):
-        try:  # l'exception sert à ignorer si l'utilisateur entre une valeur absurde.
-            value = int(self.get())
-            self.delete(0, tk.END)
-            if value >= 0 and value <= 255 and self.id == 0:
-                self.app.scales[0].set(value)
-                self.app.scales[0].value = value
-        except:
-            self.delete(0, tk.END)
+        if self.id == 0:
+            try:  # l'exception sert à ignorer si l'utilisateur entre une valeur absurde.
+                value = int(self.get())
+                self.delete(0, tk.END)
+                if value >= 0 and value <= 255 and self.id == 0:
+                    self.app.scales[0].set(value)
+                    self.app.scales[0].value = value
+            except:
+                self.delete(0, tk.END)
+
+        elif self.id == 1:
+            if self.get() != '':
+                self.unfocus()
+            else:
+                self.insert(0, 'Commentaires')
+                self.config(fg='grey')
+                self.app.labels[0].focus()
 
     def type(*args):
         self, event = args[0], args[1]
         if event.char == event.keysym or event.char == '<Button-1>':
             if self['fg'] == 'grey':
                 self.delete(0, tk.END)
+                self.config(fg='black')
+            if self['fg'] == 'green':
                 self.config(fg='black')
 
     def change_state(self, state):
@@ -288,7 +299,16 @@ class tkinterEntry(tk.Entry):
 
     def unfocus(*args):
         self = args[0]
-        self.delete(0, tk.END)
-        self.insert(0, 'Vitesse spécifique')
-        self.config(fg='grey')
-        self.app.labels[0].focus()
+        if self.id == 0:
+            self.delete(0, tk.END)
+            self.insert(0, 'Vitesse spécifique')
+            self.config(fg='grey')
+            self.app.labels[0].focus()
+
+        elif self.id == 1:
+            if self.get() == '':
+                self.insert(0, 'Commentaires')
+                self.config(fg='grey')
+            else:
+                self.config(fg='green')
+            self.app.labels[0].focus()
