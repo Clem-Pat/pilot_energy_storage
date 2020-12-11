@@ -131,9 +131,9 @@ class tkinterWindow():
         if t-self.last_tick_t >= 0.5:
             self.fps = int(self.tick/(t-self.last_tick_t))
             if self.fps < 1/self.board.record_period:
-                self.canvas[0].itemconfig(5, text=f"FPS : {self.fps} < f_acq !", fill='red')
+                self.canvas[0].itemconfig(4, text=f"FPS : {self.fps} < f_acq !", fill='red')
             else:
-                self.canvas[0].itemconfig(5, text=f'FPS : {self.fps}', fill='grey70')
+                self.canvas[0].itemconfig(4, text=f'FPS : {self.fps}', fill='grey70')
             self.last_tick_t = time.time()
             self.tick = 0
 

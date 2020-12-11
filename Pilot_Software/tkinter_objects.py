@@ -204,15 +204,13 @@ class tkinterCanvas(tk.Canvas):
             self.config(bg="white", height=65, width=600, relief='raised')
             self.x, self.y = 100, 555
 
-            self.create_text(42, 20, text="Console",
+            self.create_text(20, 20, anchor='w', text="Console",
                              font="Arial 10 italic bold", fill="blue")
-            self.create_text(56, 57, text=' ',
-                             font="Arial 10 italic bold", fill="black")
-            self.create_text(110, 45, text='Pas de carte Arduino branchée',
+            self.create_text(20, 45, anchor='w', text='Pas de carte Arduino branchée',
                              font="Arial 10 italic bold", fill="red")
-            self.create_text(570, 20, text=self.app.board.port,
+            self.create_text(580, 20, anchor='e', text=self.app.board.port,
                              font="Arial 10 italic bold", fill="black")
-            self.create_text(550, 45, text=f'FPS : {self.app.fps}',
+            self.create_text(580, 45, anchor='e', text=f'FPS : {self.app.fps}',
                              font="Arial 10 italic bold", fill="grey70")
 
         elif self.id == 1:

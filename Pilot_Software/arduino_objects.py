@@ -43,7 +43,7 @@ class Arduino_uno_board():
         try:
             self.arduinoboard = pyfirmata.Arduino(self.port)
             self.app.canvas[0].itemconfig(
-                3,  text='Arduino branchée {}'.format(self.port), fill='green')
+                2,  text='Arduino branchée {}'.format(self.port), fill='green')
         except:
             self.arduinoboard = None
 
@@ -207,7 +207,7 @@ class Arduino_uno_board():
             except FileExistsError: pass #si le dossier existe déjà on ne fait rien
             return folder_path
         def console_text_back_to_normal():
-            self.app.canvas[0].itemconfig(3, text=old_text, fill=old_color)
+            self.app.canvas[0].itemconfig(2, text=old_text, fill=old_color)
 
         self.record_demanded = False
 
@@ -216,8 +216,12 @@ class Arduino_uno_board():
         success = create_excel(self.time_list, self.Umes_list, self.distance_list, self.rotation_list,
                                self.bits_list, self.motor_is_on_list, path, name)
         if success:
-            old_text, old_color, old_x = self.app.canvas[0].itemcget(3, 'text'), self.app.canvas[0].itemcget(3, 'fill'), self.app.canvas[0].coords(3)[0]
-            self.app.canvas[0].itemconfig(3, text=f'Fichier {name} créé', fill='green')
+            old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
+            self.app.canvas[0].itemconfig(2, text=f'Fichier {name} créé ({len(self.time_list)} valeurs)', fill='green')
             self.app.fen.after(3000, console_text_back_to_normal)
         else:
+            old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
+            self.app.canvas[0].itemconfig(2, text=f'Une erreur est survenue !!', fill='red')
+            self.app.fen.after(3000, console_text_back_to_normal)
             print('FAILED !')
+            print('')
