@@ -4,7 +4,7 @@ import openpyxl
 
 
 class Excel_manager():
-    def __init__(self, L_data=[], path=None, name=None, app=None):
+    def __init__(self, app):
         self.app = app
         self.excel_names_already_used = []
 

@@ -3,6 +3,7 @@ import time
 from pynput.mouse import Button, Controller
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
 # import matplotlib.pyplot as plt
 import numpy as np
 
@@ -59,8 +60,8 @@ class tkinterWindow():
             self.objects = []
             self.figures, self.axes = [0]*10, [0]*10
             self.color = ["b", "r", "g", "c", "m", "y", "k"]
-            self.data_to_plot_name = ["dist", "rot", "speed", "motor_on"]
-            self.data_to_plot = [self.board.distance_list_plot, self.board.rotation_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
+            self.data_to_plot_name = ["u_mes", "dist", "rot", "bits", "motor_on"]
+            self.data_to_plot = [self.board.Umes_list_plot, self.board.distance_list_plot, self.board.rotation_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
 
         self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
         self.fen.geometry("{}x{}+{}+{}".format(str(self.length),str(self.height), str(self.x), str(self.y)))
@@ -96,13 +97,18 @@ class tkinterWindow():
     def plot_mesures(*args):
         def plot(plot_app, x_axis, y_axis_list):
             for i in range(len(y_axis_list)):
-                plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=100)
+                if len(y_axis_list) <= 4:
+                    plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=100)
+                    n = 160
+                if len(y_axis_list) == 5:
+                    plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=90)
+                    n = 123
                 plot_app.axes[i] = plot_app.figures[i].add_subplot(111)
                 plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_to_plot_name[i], marker="+", ls='-')
                 plot_app.axes[i].legend(loc='best', shadow=True, fontsize='small', markerscale=0.4)   #Ajouter une légende qui s'affiche au mieux sur le graphe
                 try:
                     canvas = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app.fen).get_tk_widget()
-                    canvas.place(x=0,y=160*i)
+                    canvas.place(x=0,y=n*i)
                 except:
                     pass
             plot_app.axes[0].set(xlabel='temps (s)')
@@ -134,8 +140,10 @@ class tkinterWindow():
     def update(self):
         if self.name == "main":
             self.canvas[1].itemconfig(3, text=self.readable_time())
-            self.canvas[1].itemconfig(5, text="{:.3f}".format(self.board.analog_pot)) #avec que 3 décimales
-            self.canvas[1].itemconfig(7, text="{:.3f}".format(self.board.analog_cap))
+            self.canvas[1].itemconfig(5, text="{:.3f}".format(self.board.analog_Umes)) #avec que 3 décimales
+            self.canvas[1].itemconfig(7, text="{:.3f}".format(self.board.analog_sens))
+            self.canvas[1].itemconfig(9, text="{:.3f}".format(self.board.analog_tach))
+
 
             if self.init_pot_app != None:
                 try:self.init_pot_app.update()
@@ -143,9 +151,9 @@ class tkinterWindow():
 
         elif self.name == "init_pot_app":
             if self.parent_app.particular_pot_value[0] == None :
-                self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.analog_pot))
+                self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.analog_tach))
             if self.parent_app.particular_pot_value[1] == None :
-                self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.analog_pot))
+                self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.analog_tach))
 
         self.tick += 1
         if self.name == 'main':

@@ -40,7 +40,7 @@ class tkinterButton(tk.Button):
                 self.x, self.y = 460, 460
 
             if self.id == 4:
-                self.bg, self.fg, self.cursor, self.command = "green3", 'black', "hand2", self.experience_mode
+                self.bg, self.fg, self.cursor, self.command = "green3", 'black', "hand2", self.acquisition
                 self.config(command=self.command, width=16, height=2,
                             text='Débuter Acquisition', bg=self.bg, fg=self.fg, cursor=self.cursor, font='Arial 11 bold')
                 self.x, self.y = 630, 460
@@ -60,16 +60,14 @@ class tkinterButton(tk.Button):
 
         self.bind('<Return>', self.command)
 
-    def experience_mode(*args):
+    def acquisition(*args):
         self = args[0]
         if self.bg == 'green3':
-            self.app.board.t0_record, self.app.board.time_list, self.app.board.distance_list, self.app.board.rotation_list, self.app.board.bits_list, self.app.board.motor_is_on_list = time.time(), [0.0], [self.app.board.analog_cap], [self.app.board.analog_pot], [self.app.scales[0].value], [int(self.app.board.motor_is_on)]
-            self.app.board.record_demanded = True
+            self.app.board.start_recording()
             self.bg = 'red'
             self.config(bg=self.bg, text='Stop Acquisition')
 
         elif self.bg == 'red':
-            self.app.board.record_demanded = False
             self.app.board.stop_recording()
             self.bg = 'green3'
             self.config(bg=self.bg, text='Débuter Acquisition')
@@ -218,8 +216,8 @@ class tkinterCanvas(tk.Canvas):
                              font="Arial 10 italic bold", fill="grey70")
 
         elif self.id == 1:
-            self.config(bg="white", height=100, width=300, relief='raised')
-            self.x, self.y = 100, 435
+            self.config(bg="white", height=100, width=400, relief='raised')
+            self.x, self.y = 30, 435
 
             self.create_text(42, 20, text='Données',
                              font="Arial 10 italic bold", fill="blue")
@@ -227,7 +225,7 @@ class tkinterCanvas(tk.Canvas):
                              font="Arial 8 italic", fill="black")
             self.create_text(50, 70, text='',
                              font="Arial 8 italic", fill="black")
-            self.create_text(150, 45, text='Vitesse angulaire',
+            self.create_text(150, 45, text='Tension mesurée',
                              font="Arial 8 italic", fill="black")
             self.create_text(150, 70, text='',
                              font="Arial 8 italic", fill="black")
@@ -235,9 +233,14 @@ class tkinterCanvas(tk.Canvas):
                              font="Arial 8 italic", fill="black")
             self.create_text(250, 70, text='',
                              font="Arial 8 italic", fill="black")
+            self.create_text(350, 45, text='Vitesse angulaire',
+                             font="Arial 8 italic", fill="black")
+            self.create_text(350, 70, text='',
+                             font="Arial 8 italic", fill="black")
 
             self.create_line(100, 40, 100, 130)
             self.create_line(200, 40, 200, 130)
+            self.create_line(300, 40, 300, 130)
 
 
 class tkinterEntry(tk.Entry):
