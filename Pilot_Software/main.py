@@ -23,7 +23,7 @@ def main():
     while True:
         board.analog_tach = board.get_rotation_speed_value()
         board.analog_sens = board.get_sensor_value()
-        board.analog_Umes = board.get_voltmeter_value()
+        board.analog_Umes = board.get_voltmeter_value()         #fps devient 1600 au lieu de 2000
         board.record_mesures()
 
         if board.pilot_mode == 'auto' :
@@ -37,6 +37,5 @@ def main():
         except:
             board.exit()
             break
-
 if __name__ == "__main__":
     main()
