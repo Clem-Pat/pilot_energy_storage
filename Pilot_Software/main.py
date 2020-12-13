@@ -1,7 +1,3 @@
-import tkinter as tk
-import pyfirmata
-import time
-import matplotlib.pyplot as plt
 from sys import platform
 import glob
 import serial.tools.list_ports
