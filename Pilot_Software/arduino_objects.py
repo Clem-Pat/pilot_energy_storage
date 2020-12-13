@@ -20,7 +20,7 @@ class Arduino_uno_board():
     def __init__(self, usb_port, analogs=[], output_pins=[], pwm_pins=[], servo_pins=[]):
         """analogs = [0, 1, 2, 3, 4, 5], output_pins = [2, 4, 7, 8, 12, 13], pwm_pins=[3, 5, 6, 9, 10, 11]"""
 
-        self.name = 'board_' + usb_port
+        self.name = "board_" + usb_port
         self.port = usb_port
         self.arduinoboard = None
         self.analog_pins = analogs
@@ -31,7 +31,7 @@ class Arduino_uno_board():
         self.pin = None
         self.analog_Umes, self.analog_sens, self.analog_tach = self.get_voltmeter_value(), self.get_sensor_value(), self.get_rotation_speed_value()
         self.motor_is_on = False
-        self.pilot_mode = 'manual'
+        self.pilot_mode = "manual"
         self.record_demanded = False
         self.record_period = 0.1  # période d'acquisition en secondes
         self.t0_record, self.time_list, self.Umes_list, self.distance_list, self.rotation_list, self.bits_list, self.motor_is_on_list = time.time(), [0], [0.0], [self.analog_sens], [self.analog_tach], [0], [int(self.motor_is_on)]
@@ -43,7 +43,7 @@ class Arduino_uno_board():
         try:
             self.arduinoboard = pyfirmata.Arduino(self.port)
             self.app.canvas[0].itemconfig(
-                2,  text='Arduino branchée {}'.format(self.port), fill='green')
+                2,  text="Arduino branchée {}".format(self.port), fill="green")
         except:
             self.arduinoboard = None
 
@@ -55,36 +55,33 @@ class Arduino_uno_board():
             self.pin = {}
             for i in self.analog_pins:
                 self.arduinoboard.analog[i].enable_reporting()
-                self.pin["A" + str(i)] = self.arduinoboard.analog[i]
-                self.pin["A" + str(i)].value = self.pin["A" + str(i)].read()
+                self.pin[f"A{i}"] = self.arduinoboard.analog[i]
+                self.pin[f"A{i}"].value = self.pin[f"A{i}"].read()
                 time.sleep(0.5)
 
             for j in self.digital_pins:
                 if j in self.pwm_pins:
-                    self.pin["d" +
-                             str(j)] = self.arduinoboard.get_pin('d:' + str(j) + ':p')
+                    self.pin[f"d{j}"] = self.arduinoboard.get_pin(f"d:{j}:p")
                 elif j in self.servo_pins:
-                    self.pin["d" +
-                             str(j)] = self.arduinoboard.get_pin('d:' + str(j) + ':s')
+                    self.pin[f"d{j}"] = self.arduinoboard.get_pin(f"d:{j}:s")
                 else:
-                    self.pin["d" +
-                             str(j)] = self.arduinoboard.get_pin('d:' + str(j) + ':o')
-                self.pin["d" + str(j)].value = None
+                    self.pin[f"d{j}"] = self.arduinoboard.get_pin(f"d:{j}:o")
+                self.pin[f"d{j}"].value = None
 
             self.init_board()
 
         else:
             self.pin = {}
             for i in self.analog_pins:
-                self.pin["A" + str(i)] = None
+                self.pin[f"A{i}"] = None
             for i in self.digital_pins:
-                self.pin["d" + str(i)] = None
+                self.pin[f"d{i}"] = None
 
     def init_board(self):
         if self.arduinoboard != None:
-            self.pin['d9'].write(0)
-            self.pin['d7'].write(0)
-            self.pin['d8'].write(1)
+            self.pin["d9"].write(0)
+            self.pin["d7"].write(0)
+            self.pin["d8"].write(1)
 
     def exit(self):
         if self.arduinoboard != None:
@@ -92,7 +89,7 @@ class Arduino_uno_board():
 
     def get_voltmeter_value(self):
         if self.arduinoboard != None:
-            return (self.pin['A0'].read())*5
+            return (self.pin["A0"].read())*5
         else:
             return 0
 
@@ -100,7 +97,7 @@ class Arduino_uno_board():
         """grâce à étude du capteur de distance Sensor_study"""
         if self.arduinoboard != None:
             if 1 in self.analog_pins:
-                x = float(self.pin['A1'].read())
+                x = float(self.pin["A1"].read())
                 # value = float(48.366*np.exp(-(float(x)-0.102)/0.109)+7.931) #3/2
                 # value = float(71.36*np.exp(-(float(x)-78.2*10**(-3))/0.104)+9.445) #5/2 old
                 if x > 0.43 and x <= 0.7:  # entre 5 et 13 cm
@@ -118,36 +115,36 @@ class Arduino_uno_board():
             return 0
 
     def get_rotation_speed_value(self):
-        """Grâce aux études de capteurs Tachymeter_study, et Violette's study"""
+        """Grâce aux études de capteurs Tachymeter_study, et Violette"s study"""
         if self.arduinoboard != None:
-            return 376.64 * self.pin['A2'].read() + 288.92  # Violette's study
+            return 376.64 * self.pin["A2"].read() + 288.92  # Violette"s study
         else:
             return 0
 
     def change_motor_rotation(self, rotation_direction):
         if self.arduinoboard != None:
-            if rotation_direction == 'direct':
-                self.pin['d7'].write(0)
-                self.pin['d8'].write(1)
-            elif rotation_direction == 'indirect':
-                self.pin['d7'].write(1)
-                self.pin['d8'].write(0)
+            if rotation_direction == "direct":
+                self.pin["d7"].write(0)
+                self.pin["d8"].write(1)
+            elif rotation_direction == "indirect":
+                self.pin["d7"].write(1)
+                self.pin["d8"].write(0)
 
     def change_motor_speed(self, value):
         if self.arduinoboard != None and self.motor_is_on:
-            self.pin['d9'].write(int(value) / 255)
+            self.pin["d9"].write(int(value) / 255)
 
     def stop_motor(self, forced=False):
         self.motor_is_on = False
         self.motor_is_forced = forced
         if self.arduinoboard != None:
-            self.pin['d9'].write(0)
+            self.pin["d9"].write(0)
 
     def start_motor(self, forced=False):
         self.motor_is_on = True
         self.motor_is_forced = forced
         if self.arduinoboard != None:
-            self.pin['d9'].write(int(self.app.scales[0].value) / 255)
+            self.pin["d9"].write(int(self.app.scales[0].value) / 255)
 
     def start_recording(self):
         self.t0_record, self.time_list, self.Umes_list, self.distance_list, self.rotation_list, self.bits_list, self.motor_is_on_list = time.time(), [0.0], [self.analog_Umes], [self.analog_sens], [self.analog_tach], [self.app.scales[0].value], [int(self.motor_is_on)]
@@ -183,27 +180,26 @@ class Arduino_uno_board():
 
     def stop_recording(self):
         def find_file_name():
-            title = 'Expérience_'
-            date = datetime.date.today().strftime("%d/%m/%Y").split('/')
-            today = str(date[0] + '-' + date[1])
-            if self.app.entrys[1]['fg'] == 'green': comment = '_' + str(self.app.entrys[1].get())
-            else: comment = ''
-            name = str(title + today + comment)
+            date = datetime.date.today().strftime("%d/%m/%Y").split("/")
+            today = f"{date[0]}-{date[1]}"
+            if self.app.entrys[1]["fg"] == "green": comment = f"_{str(self.app.entrys[1].get())}"
+            else: comment = ""
+            name = f"Expérience_{today}{comment}"
             i = 1
             if self.arduinoboard == None:
-                while str(name + '_TEST' + '(' + str(i) + ')') in self.excel_names_already_used: i += 1
-                name = str(name + '_TEST' + '(' + str(i) + ')')
+                while f"{name}_TEST({i})" in self.excel_names_already_used: i += 1
+                name = f"{name}_TEST({i})"
             else:
-                while str(name + '(' + str(i) + ')') in self.excel_names_already_used: i += 1
-                name = str(name + '(' + str(i) + ')')
+                while f"{name}({i})" in self.excel_names_already_used: i += 1
+                name = f"{name}({i})"
             self.excel_names_already_used.append(name)
-            print('will create', name, f'{len(self.time_list)} values')
+            print(f"will create {name} ({len(self.time_list)} values)")
             return name
         def find_file_path():
-            date = datetime.date.today().strftime("%d/%m/%Y").split('/')
-            today = str(date[0] + '-' + date[1])
-            folder_path = self.path + '/' + today
-            try: os.mkdir(folder_path) #si le dossier n'existe pas on le crée
+            date = datetime.date.today().strftime("%d/%m/%Y").split("/")
+            today = f"{date[0]}-{date[1]}"
+            folder_path = f"{self.path}/{today}"
+            try: os.mkdir(folder_path) #si le dossier n"existe pas on le crée
             except FileExistsError: pass #si le dossier existe déjà on ne fait rien
             return folder_path
         def console_text_back_to_normal():
@@ -216,12 +212,12 @@ class Arduino_uno_board():
         success = create_excel(self.time_list, self.Umes_list, self.distance_list, self.rotation_list,
                                self.bits_list, self.motor_is_on_list, path, name)
         if success:
-            old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
-            self.app.canvas[0].itemconfig(2, text=f'Fichier {name} créé ({len(self.time_list)} valeurs)', fill='green')
+            old_text, old_color = self.app.canvas[0].itemcget(2, "text"), self.app.canvas[0].itemcget(2, "fill")
+            self.app.canvas[0].itemconfig(2, text=f"Fichier {name} créé ({len(self.time_list)} valeurs)", fill="green")
             self.app.fen.after(3000, console_text_back_to_normal)
         else:
-            old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
-            self.app.canvas[0].itemconfig(2, text=f'Une erreur est survenue !!', fill='red')
+            old_text, old_color = self.app.canvas[0].itemcget(2, "text"), self.app.canvas[0].itemcget(2, "fill")
+            self.app.canvas[0].itemconfig(2, text=f"Une erreur est survenue !!", fill="red")
             self.app.fen.after(3000, console_text_back_to_normal)
-            print('FAILED !')
-            print('')
+            print("FAILED !")
+            print("")

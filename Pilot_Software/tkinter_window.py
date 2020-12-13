@@ -64,7 +64,7 @@ class tkinterWindow():
             self.data_to_plot = [self.board.Umes_list_plot, self.board.distance_list_plot, self.board.rotation_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
 
         self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
-        self.fen.geometry("{}x{}+{}+{}".format(str(self.length),str(self.height), str(self.x), str(self.y)))
+        self.fen.geometry(f"{self.length}x{self.height}+{self.x}+{self.y}")
         self.fen.resizable(width=False, height=False)
         self.fen.bind('<Escape>', self.destroy)
         self.fen.bind('<Control_L>r', self.reload)
