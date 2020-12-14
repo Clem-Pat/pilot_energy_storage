@@ -1,67 +1,75 @@
 import os
 import pandas as pd
 import openpyxl
+import datetime
 
 
 class Excel_manager():
     def __init__(self, app):
         self.app = app
         self.excel_names_already_used = []
-
-        if path == None: self.path = self.find_file_path()
-        else: self.path = path
-
-        if name == None: self.name = self.find_file_name()
-        else: self.name = name
-
-        self.L_data = L_data
-        self.data_dic = {"temps": L_data[0], "distance mesurée": L_data[1], "vitesse rotation": L_data[2], "bits envoyés": L_data[3], "motor_is_on" : L_data[4]}
-
+        self.project_path = os.path.dirname(os.path.abspath(__file__))
 
     def find_file_name(self):
-        title = "Expérience_"
-        date = datetime.date.today().strftime("%d/%m/%Y").split("/")
-        today = str(date[0] + "-" + date[1])
-        comment = ""
-        if self.app != None:
-            if self.app.entrys[1]["fg"] == "green":
-                comment = "_" + str(self.app.entrys[1].get())
-        name = str(title + today + comment)
+        date = datetime.date.today().strftime('%d/%m/%Y').split('/')
+        today = f'{date[0]}-{date[1]}'
+        if self.app.entrys[1]['fg'] == 'green': comment = f'_{str(self.app.entrys[1].get())}'
+        else: comment = ''
+        name = f'Expérience_{today}{comment}'
         i = 1
-        if self.board.arduinoboard == None:
-            while str(name + "_TEST" + "(" + str(i) + ")") in self.excel_names_already_used: i += 1
-            name = str(name + "_TEST" + "(" + str(i) + ")")
+        if self.app.board.arduinoboard == None:
+            while f'{name}_TEST({i})' in self.excel_names_already_used: i += 1
+            name = f'{name}_TEST({i})'
         else:
-            while str(name + "(" + str(i) + ")") in self.excel_names_already_used: i += 1
-            name = str(name + "(" + str(i) + ")")
+            while f'{name}({i})' in self.excel_names_already_used: i += 1
+            name = f'{name}({i})'
         self.excel_names_already_used.append(name)
-        print("will create", name, f"{len(self.time_list)} values")
+        print(f'will create {name} ({len(self.data_dic["Temps"])} values)')
         return name
 
     def find_file_path(self):
-        date = datetime.date.today().strftime("%d/%m/%Y").split("/")
-        today = str(date[0] + "-" + date[1])
-        folder_path = self.path + "/" + today
-        try: os.mkdir(folder_path) #si le dossier n"existe pas on le crée
+        date = datetime.date.today().strftime('%d/%m/%Y').split('/')
+        today = f'{date[0]}-{date[1]}'
+        folder_path = f'{self.project_path}/{today}'
+        try: os.mkdir(folder_path) #si le dossier n'existe pas on le crée
         except FileExistsError: pass #si le dossier existe déjà on ne fait rien
         return folder_path
 
-    def create_excel(self):
-        """crée le fichier excel de l"expérience"""
-        if len(self.L_data[0]) == len(self.L_data[1]):
-            df = pd.DataFrame(self.data_dic)
+    def data_from_list_to_dict(self,L_data):
+        return {"Temps": L_data[0], "Tension mesurée": L_data[1], "Distance mesurée": L_data[2], "Vitesse rotation": L_data[3], "Bits envoyés": L_data[4], "Moteur allumé" : L_data[5]}
 
-            writer = pd.ExcelWriter(self.path+"/"+self.name+".xlsx")
-            df.to_excel(writer, sheet_name="Valeurs", index=False)
 
-            writer.save()
+    def print_in_console(self, successed, name):
+        def console_text_back_to_normal():
+            self.app.canvas[0].itemconfig(2, text=old_text, fill=old_color)
 
-            read_file = pd.read_excel (self.path+"/"+self.name+".xlsx")
-            read_file.to_csv (self.path+"/"+self.name+".csv", index=False, header=True)
-
+        if successed:
             print("CSV and Excel file created \n")
-            return True
-
+            old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
+            self.app.canvas[0].itemconfig(2, text=f'Fichier {name} créé ({len(self.L_data[0])} valeurs)', fill='green')
+            self.app.fen.after(3000, console_text_back_to_normal)
         else:
-            print("les listes doivent être de la même longueur")
-            return False
+            lists_lengths = str(','.join([str(len(x)) for x in self.L_data]))
+            print(f'Lists must have the same length ! ({lists_lengths}) \n')
+            old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
+            self.app.canvas[0].itemconfig(2, text=f'Les listes ne sont pas de la même taille !', fill='red')
+            self.app.fen.after(3000, console_text_back_to_normal)
+
+    def create_excel(self, L_data):
+        """crée le fichier excel de l"expérience"""
+        self.L_data = L_data
+        self.data_dic = self.data_from_list_to_dict(self.L_data)
+        path = self.find_file_path()
+        name = self.find_file_name()
+        if len(set(map(len, self.L_data))) in (0, 1): #Toutes les listes sont de même taille, on peut créer l'excel
+            data_frame = pd.DataFrame(self.data_dic)
+            writer = pd.ExcelWriter(f'{path}/{name}.xlsx')
+            data_frame.to_excel(writer, index=False)
+            writer.save()
+            # print(f'{path}/{name}.xlsx')
+            read_file = pd.read_excel(f'{path}/{name}.xlsx')
+            read_file.to_csv(f'{path}/{name}.csv', index=False, header=True)
+
+            self.print_in_console(True, name)
+        else:
+            self.print_in_console(False, None)

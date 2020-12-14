@@ -7,11 +7,10 @@ import matplotlib.pyplot as plt
 # import matplotlib.pyplot as plt
 import numpy as np
 
-from tkinter_objects import tkinterButton, tkinterLabel, tkinterScale, tkinterCanvas, tkinterEntry
+from tkinter_objects import TkinterButton, TkinterLabel, TkinterScale, TkinterCanvas, TkinterEntry
 import main
-import arduino_objects
 
-class tkinterWindow():
+class TkinterWindow():
 
     def __init__(self, name_of_application, board, init_pot_app=None, parent_app=None):
 
@@ -30,12 +29,12 @@ class tkinterWindow():
             self.x, self.y = 470, 0
             self.length, self.height = 800, 800
             self.fen.title("Interface de pilotage du système de stockage d'énergie")
-            self.fen.configure(bg="light blue")
-            self.buttons = [tkinterButton(self, i) for i in range(5)]
-            self.labels = [tkinterLabel(self, i) for i in range(2)]
-            self.scales = [tkinterScale(self, i) for i in range(1)]
-            self.canvas = [tkinterCanvas(self, i) for i in range(2)]
-            self.entrys = [tkinterEntry(self, i) for i in range(2)]
+            self.fen.configure(bg='light blue')
+            self.buttons = [TkinterButton(self, i) for i in range(5)]
+            self.labels = [TkinterLabel(self, i) for i in range(2)]
+            self.scales = [TkinterScale(self, i) for i in range(1)]
+            self.canvas = [TkinterCanvas(self, i) for i in range(2)]
+            self.entrys = [TkinterEntry(self, i) for i in range(2)]
             self.objects = [self.buttons, self.labels, self.scales, self.canvas, self.entrys]
 
             self.board.app = self
@@ -44,34 +43,34 @@ class tkinterWindow():
             self.particular_pot_value = [None, None]
             self.plot_demanded = False
 
-        elif self.name == "init_pot_app":
+        elif self.name == 'init_pot_app':
             self.x, self.y = 10, 50
             self.length, self.height = 650, 500
-            self.fen.title("Initialisation potentiomètres")
-            self.fen.configure(bg="grey70")
-            self.buttons = [tkinterButton(self, i) for i in range(2)]
-            self.labels = [tkinterLabel(self, i) for i in range(3)]
+            self.fen.title('Initialisation potentiomètres')
+            self.fen.configure(bg='grey70')
+            self.buttons = [TkinterButton(self, i) for i in range(2)]
+            self.labels = [TkinterLabel(self, i) for i in range(3)]
             self.objects = [self.buttons, self.labels]
 
-        elif self.name == "plot_app":
+        elif self.name == 'plot_app':
             self.x, self.y = -10,0
             self.length, self.height = 480, 650
-            self.fen.title("plot mesures")
+            self.fen.title('plot mesures')
             self.objects = []
             self.figures, self.axes = [0]*10, [0]*10
-            self.color = ["b", "r", "g", "c", "m", "y", "k"]
-            self.data_to_plot_name = ["u_mes", "dist", "rot", "bits", "motor_on"]
+            self.color = ['b', 'r', 'g', 'c', 'm', 'y', 'k']
+            self.data_to_plot_name = ['u_mes', 'dist', 'rot', 'bits', 'motor_on']
             self.data_to_plot = [self.board.Umes_list_plot, self.board.distance_list_plot, self.board.rotation_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
 
         self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
-        self.fen.geometry(f"{self.length}x{self.height}+{self.x}+{self.y}")
+        self.fen.geometry(f'{self.length}x{self.height}+{self.x}+{self.y}')
         self.fen.resizable(width=False, height=False)
         self.fen.bind('<Escape>', self.destroy)
         self.fen.bind('<Control_L>r', self.reload)
         self.fen.bind('<Control_L>m', self.get_mouse_position)
         self.fen.bind('<Control_L>p', self.demand_plot)
         self.fen.bind('<question>', self.print_shortcut)
-        self.fen.protocol("WM_DELETE_WINDOW", self.destroy)
+        self.fen.protocol('WM_DELETE_WINDOW', self.destroy)
 
         self.place_all_objects()
         self.update()
@@ -87,10 +86,10 @@ class tkinterWindow():
 
     def demand_plot(*args):
         self = args[0]
-        if self.name == "main":
+        if self.name == 'main':
             self.plot_demanded = not self.plot_demanded
             if self.plot_demanded:
-                self.plot_app = tkinterWindow("plot_app", self.board, parent_app=self)
+                self.plot_app = TkinterWindow('plot_app', self.board, parent_app=self)
             else:
                 self.plot_app.destroy()
 
@@ -104,7 +103,7 @@ class tkinterWindow():
                     plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=90)
                     n = 123
                 plot_app.axes[i] = plot_app.figures[i].add_subplot(111)
-                plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_to_plot_name[i], marker="+", ls='-')
+                plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_to_plot_name[i], marker='+', ls='-')
                 plot_app.axes[i].legend(loc='best', shadow=True, fontsize='small', markerscale=0.4)   #Ajouter une légende qui s'affiche au mieux sur le graphe
                 try:
                     canvas = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app.fen).get_tk_widget()
@@ -122,8 +121,8 @@ class tkinterWindow():
         temps_tuple = time.gmtime(t)
         reste = t - temps_tuple[3] * 3600.0 - temps_tuple[4] * \
             60.0 - temps_tuple[5] * 1.0  # on récupère le reste
-        reste = ("%.2f" % reste)[-2::]
-        tt = time.strftime("%H:%M:%S", temps_tuple) + "," + reste
+        reste = ('%.2f' % reste)[-2::]
+        tt = time.strftime('%H:%M:%S', temps_tuple) + ',' + reste
         return tt
 
     def get_and_update_fps(self):
@@ -131,25 +130,25 @@ class tkinterWindow():
         if t-self.last_tick_t >= 0.5:
             self.fps = int(self.tick/(t-self.last_tick_t))
             if self.fps < 1/self.board.record_period:
-                self.canvas[0].itemconfig(4, text=f"FPS : {self.fps} < f_acq !", fill='red')
+                self.canvas[0].itemconfig(4, text=f'FPS : {self.fps} < f_acq !', fill='red')
             else:
                 self.canvas[0].itemconfig(4, text=f'FPS : {self.fps}', fill='grey70')
             self.last_tick_t = time.time()
             self.tick = 0
 
     def update(self):
-        if self.name == "main":
+        if self.name == 'main':
             self.canvas[1].itemconfig(3, text=self.readable_time())
-            self.canvas[1].itemconfig(5, text="{:.3f}".format(self.board.analog_Umes)) #avec que 3 décimales
-            self.canvas[1].itemconfig(7, text="{:.3f}".format(self.board.analog_sens))
-            self.canvas[1].itemconfig(9, text="{:.3f}".format(self.board.analog_tach))
+            self.canvas[1].itemconfig(5, text='{:.3f}'.format(self.board.analog_Umes)) #avec que 3 décimales
+            self.canvas[1].itemconfig(7, text='{:.3f}'.format(self.board.analog_sens))
+            self.canvas[1].itemconfig(9, text='{:.3f}'.format(self.board.analog_tach))
 
 
             if self.init_pot_app != None:
                 try:self.init_pot_app.update()
                 except:self.init_pot_app = None
 
-        elif self.name == "init_pot_app":
+        elif self.name == 'init_pot_app':
             if self.parent_app.particular_pot_value[0] == None :
                 self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.analog_tach))
             if self.parent_app.particular_pot_value[1] == None :
@@ -178,12 +177,12 @@ class tkinterWindow():
                 if self.plot_app != None:
                     self.plot_app.destroy()
 
-            if self.name == "init_pot_app":
+            if self.name == 'init_pot_app':
                 try: self.fen.destroy()
                 except: pass
                 self.parent_app.init_pot_app = None
 
-            if self.name == "plot_app":
+            if self.name == 'plot_app':
                 try: self.fen.destroy()
                 except: pass
                 self.parent_app.plot_demanded = False
