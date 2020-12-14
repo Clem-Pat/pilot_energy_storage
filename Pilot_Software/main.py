@@ -17,11 +17,12 @@ ENB pin d9"""
 def find_port():
     if platform == "win32":
         ports = list(serial.tools.list_ports.comports())
-        if len(ports) == 1: return str(ports[0]).split("-")[0]
-        else: return "COM7"
-
+        if len(ports) == 1: return str(ports[0][0])
+        else: return str(None)
     if platform == "darwin":
-        return str(glob.glob("/dev/tty.usbmodem*")[0])
+        ports = list(glob.glob("/dev/tty.usbmodem*"))
+        if len(ports) == 1: return str(ports[0])
+        else: return str(None)
 
 def main():
     port = find_port()
