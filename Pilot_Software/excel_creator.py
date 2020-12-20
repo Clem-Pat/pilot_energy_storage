@@ -61,7 +61,7 @@ class Excel_manager():
         self.data_dic = self.data_from_list_to_dict(self.L_data)
         path = self.find_file_path()
         name = self.find_file_name()
-        if len(set(map(len, self.L_data))) in (0, 1): #Toutes les listes sont de même taille, on peut créer l'excel
+        if False not in [len(i) == len(self.L_data[0]) for i in self.L_data]: #Toutes les listes sont de même taille, on peut créer l'excel
             data_frame = pd.DataFrame(self.data_dic)
             writer = pd.ExcelWriter(f'{path}/{name}.xlsx')
             data_frame.to_excel(writer, index=False)
