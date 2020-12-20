@@ -6,15 +6,6 @@ import datetime
 
 from excel_creator import Excel_manager
 
-'''
-Voltmeter pin A0
-sensor pin A1
-tachymeter pin A2
-IN3 pin d7
-IN4 pin d8
-ENB pin d9'''
-'''740g 0,75cL'''
-
 class Arduino_uno_board():
 
     def __init__(self, usb_port, analogs=[], output_pins=[], pwm_pins=[], servo_pins=[]):
