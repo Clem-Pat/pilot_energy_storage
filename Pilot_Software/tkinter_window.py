@@ -59,8 +59,8 @@ class TkinterWindow():
             self.objects = []
             self.figures, self.axes = [0]*10, [0]*10
             self.color = ['b', 'r', 'g', 'c', 'm', 'y', 'k']
-            self.data_to_plot_name = ['u_mes', 'dist', 'rot', 'bits', 'motor_on']
-            self.data_to_plot = [self.board.Umes_list_plot, self.board.distance_list_plot, self.board.rotation_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
+            self.data_to_plot_name = ['u_mes', 'speed', 'dist', 'bits', 'motor_on']
+            self.data_to_plot = [self.board.u_mes_list_plot, self.board.angular_speed_list_plot, self.board.distance_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
 
         self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
         self.fen.geometry(f'{self.length}x{self.height}+{self.x}+{self.y}')
@@ -139,9 +139,9 @@ class TkinterWindow():
     def update(self):
         if self.name == 'main':
             self.canvas[1].itemconfig(3, text=self.readable_time())
-            self.canvas[1].itemconfig(5, text='{:.3f}'.format(self.board.analog_Umes)) #avec que 3 décimales
-            self.canvas[1].itemconfig(7, text='{:.3f}'.format(self.board.analog_sens))
-            self.canvas[1].itemconfig(9, text='{:.3f}'.format(self.board.analog_tach))
+            self.canvas[1].itemconfig(5, text='{:.3f}'.format(self.board.u_mes)) #avec que 3 décimales
+            self.canvas[1].itemconfig(7, text='{:.3f}'.format(self.board.distance))
+            self.canvas[1].itemconfig(9, text='{:.3f}'.format(self.board.angular_speed))
 
 
             if self.init_pot_app != None:
@@ -150,9 +150,9 @@ class TkinterWindow():
 
         elif self.name == 'init_pot_app':
             if self.parent_app.particular_pot_value[0] == None :
-                self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.analog_tach))
+                self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.angular_position))
             if self.parent_app.particular_pot_value[1] == None :
-                self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.analog_tach))
+                self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.angular_position))
 
         self.tick += 1
         if self.name == 'main':

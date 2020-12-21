@@ -24,7 +24,7 @@ class Excel_manager():
             while f'{name}({i})' in self.excel_names_already_used: i += 1
             name = f'{name}({i})'
         self.excel_names_already_used.append(name)
-        print(f'will create {name} ({len(self.data_dic["Temps"])} values)')
+        print(f'will create {name} ({len(self.data_dic["Temps (s)"])} values)')
         return name
 
     def find_file_path(self):
@@ -36,8 +36,7 @@ class Excel_manager():
         return folder_path
 
     def data_from_list_to_dict(self,L_data):
-        return {"Temps": L_data[0], "Tension mesurée": L_data[1], "Distance mesurée": L_data[2], "Vitesse rotation": L_data[3], "Bits envoyés": L_data[4], "Moteur allumé" : L_data[5]}
-
+        return {"Temps (s)": L_data[0], "Tension mesurée (V)": L_data[1], "Position Angulaire (rad)": L_data[2], "Vitesse rotation (rad/s)": L_data[3],  "Distance mesurée (cm)": L_data[4], "Bits envoyés": L_data[5], "Moteur allumé" : L_data[6]}
 
     def print_in_console(self, successed, name):
         def console_text_back_to_normal():
@@ -56,7 +55,7 @@ class Excel_manager():
             self.app.fen.after(3000, console_text_back_to_normal)
 
     def create_excel(self, L_data):
-        """crée le fichier excel de l"expérience"""
+        """crée le fichier excel de l'expérience"""
         self.L_data = L_data
         self.data_dic = self.data_from_list_to_dict(self.L_data)
         path = self.find_file_path()
