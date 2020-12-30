@@ -31,7 +31,7 @@ def find_port():
 def main():
     port = find_port()
     board = arduino_objects.Arduino_uno_board(port, analogs=[0,1,2], output_pins=[7,8], input_pins=[2,3,4], pwm_pins=[9])
-    app = tkinter_window.TkinterWindow('main', board)
+    app = tkinter_window.Tkinter_window('main', board)
 
     while True:
         board.u_mes = board.get_voltmeter_value()

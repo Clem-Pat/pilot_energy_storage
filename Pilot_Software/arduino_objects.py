@@ -97,13 +97,14 @@ class Arduino_uno_board():
             self.arduinoboard.exit()
 
     def get_voltmeter_value(self):
+        """returns tension mesured in volts"""
         if self.arduinoboard != None:
             return (self.pin['A0'].read())*5
         else:
             return 0
 
     def get_angular_position_value(self):
-        """returns angular_position in radiants"""
+        """returns angular position mesured in degrees"""
         if self.arduinoboard != None :
             now_dt = self.pin['d3'].read()
             now_clk = self.pin['d4'].read()
@@ -116,16 +117,21 @@ class Arduino_uno_board():
             if not now_sw:
                 self.angular_counter = 0
             self.old_clk, self.old_dt = now_clk, now_dt
-            return (self.angular_counter*np.pi)/40
+            return (self.angular_counter*360)/20
         else: return 0
 
     def get_angular_speed_value(self):
+        """returns the angular speed in degrees/s"""
         if len(self.angular_position_list) >= 2:
-            return (self.angular_position_list[-1]-self.angular_position_list[-2])/(self.time_list[-1]-self.time_list[-2])
+            if len(self.angular_position_list) >= 1/self.record_period:
+                return (self.angular_position_list[-1]-self.angular_position_list[-int(1/self.record_period)])/(self.time_list[-1]-self.time_list[-int(1/self.record_period)])
+            else:
+                return self.record_period*(self.angular_position_list[-1]-self.angular_position_list[-2])/(self.time_list[-1]-self.time_list[-2])
         else:
             return 0
 
     def get_distance_value(self):
+        """returns distance to mass in cm. (d=theta*pulley_radius)"""
         return self.angular_position * self.pulley_radius
 
     def change_motor_rotation(self, rotation_direction):

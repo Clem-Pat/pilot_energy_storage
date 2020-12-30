@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 # import matplotlib.pyplot as plt
 import numpy as np
 
-from tkinter_objects import TkinterButton, TkinterLabel, TkinterScale, TkinterCanvas, TkinterEntry
+from tkinter_objects import Tkinter_button, Tkinter_label, Tkinter_scale, Tkinter_canvas, Tkinter_entry
 import main
 
-class TkinterWindow():
+class Tkinter_window():
 
     def __init__(self, name_of_application, board, init_pot_app=None, parent_app=None):
 
@@ -30,11 +30,11 @@ class TkinterWindow():
             self.length, self.height = 800, 800
             self.fen.title("Interface de pilotage du système de stockage d'énergie")
             self.fen.configure(bg='light blue')
-            self.buttons = [TkinterButton(self, i) for i in range(5)]
-            self.labels = [TkinterLabel(self, i) for i in range(2)]
-            self.scales = [TkinterScale(self, i) for i in range(1)]
-            self.canvas = [TkinterCanvas(self, i) for i in range(2)]
-            self.entrys = [TkinterEntry(self, i) for i in range(2)]
+            self.buttons = [Tkinter_button(self, i) for i in range(5)]
+            self.labels = [Tkinter_label(self, i) for i in range(2)]
+            self.scales = [Tkinter_scale(self, i) for i in range(1)]
+            self.canvas = [Tkinter_canvas(self, i) for i in range(2)]
+            self.entrys = [Tkinter_entry(self, i) for i in range(2)]
             self.objects = [self.buttons, self.labels, self.scales, self.canvas, self.entrys]
 
             self.board.app = self
@@ -48,8 +48,8 @@ class TkinterWindow():
             self.length, self.height = 650, 500
             self.fen.title('Initialisation potentiomètres')
             self.fen.configure(bg='grey70')
-            self.buttons = [TkinterButton(self, i) for i in range(2)]
-            self.labels = [TkinterLabel(self, i) for i in range(3)]
+            self.buttons = [Tkinter_button(self, i) for i in range(2)]
+            self.labels = [Tkinter_label(self, i) for i in range(3)]
             self.objects = [self.buttons, self.labels]
 
         elif self.name == 'plot_app':
@@ -89,7 +89,7 @@ class TkinterWindow():
         if self.name == 'main':
             self.plot_demanded = not self.plot_demanded
             if self.plot_demanded:
-                self.plot_app = TkinterWindow('plot_app', self.board, parent_app=self)
+                self.plot_app = Tkinter_window('plot_app', self.board, parent_app=self)
             else:
                 self.plot_app.destroy()
 

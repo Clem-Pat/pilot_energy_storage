@@ -5,7 +5,7 @@ import time
 import tkinter_window
 
 
-class TkinterButton(tk.Button):
+class Tkinter_button(tk.Button):
     '''Créer les boutons de commande'''
     def __init__(self, application, id):
         tk.Button.__init__(self, application.fen)
@@ -81,7 +81,7 @@ class TkinterButton(tk.Button):
     def initialiser_potentiometres(*args):
         self = args[0]
         if self.app.init_pot_app == None:
-            init_pot_app = tkinter_window.TkinterWindow('init_pot_app', self.app.board, parent_app=self.app)
+            init_pot_app = tkinter_window.Tkinter_window('init_pot_app', self.app.board, parent_app=self.app)
             self.app.init_pot_app = init_pot_app
             init_pot_app.place_all_objects()
         else:
@@ -128,7 +128,7 @@ class TkinterButton(tk.Button):
         self.app.labels[0].focus()
 
 
-class TkinterLabel(tk.Label):
+class Tkinter_label(tk.Label):
 
     def __init__(self, application, id):
 
@@ -162,7 +162,7 @@ class TkinterLabel(tk.Label):
                 self.x, self.y = 350, 300
 
 
-class TkinterScale(tk.Scale):
+class Tkinter_scale(tk.Scale):
     '''Graduation pour valeur d'entrée'''
 
     def __init__(self, application, id):
@@ -190,7 +190,7 @@ class TkinterScale(tk.Scale):
             self.config(state=state, fg='black')
 
 
-class TkinterCanvas(tk.Canvas):
+class Tkinter_canvas(tk.Canvas):
     '''Console d'affichage'''
 
     def __init__(self, application, id):
@@ -240,7 +240,7 @@ class TkinterCanvas(tk.Canvas):
             self.create_line(300, 40, 300, 130)
 
 
-class TkinterEntry(tk.Entry):
+class Tkinter_entry(tk.Entry):
     '''boîtes d'entrée de texte pour consigne'''
 
     def __init__(self, application, id):
