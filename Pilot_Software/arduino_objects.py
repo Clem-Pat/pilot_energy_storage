@@ -4,7 +4,7 @@ import numpy as np
 import os
 import datetime
 
-from excel_creator import Excel_manager
+from excel_manager import Excel_manager
 
 '''
 Voltmeter pin A0
