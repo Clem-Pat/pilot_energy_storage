@@ -8,7 +8,7 @@ import tkinter_window
 class Tkinter_button(tk.Button):
     '''Créer les boutons de commande'''
     def __init__(self, application, id):
-        tk.Button.__init__(self, application.fen)
+        tk.Button.__init__(self, application)
 
         self.app = application
         self.id = id
@@ -132,7 +132,7 @@ class Tkinter_label(tk.Label):
 
     def __init__(self, application, id):
 
-        tk.Label.__init__(self, application.fen)
+        tk.Label.__init__(self, application)
         self.id = id
         self.app = application
 
@@ -166,7 +166,7 @@ class Tkinter_scale(tk.Scale):
     '''Graduation pour valeur d'entrée'''
 
     def __init__(self, application, id):
-        tk.Scale.__init__(self, application.fen)
+        tk.Scale.__init__(self, application)
 
         self.id = id
         self.app = application
@@ -194,7 +194,7 @@ class Tkinter_canvas(tk.Canvas):
     '''Console d'affichage'''
 
     def __init__(self, application, id):
-        tk.Canvas.__init__(self, application.fen)
+        tk.Canvas.__init__(self, application)
         self.id = id
         self.app = application
 
@@ -244,7 +244,7 @@ class Tkinter_entry(tk.Entry):
     '''boîtes d'entrée de texte pour consigne'''
 
     def __init__(self, application, id):
-        tk.Entry.__init__(self, application.fen)
+        tk.Entry.__init__(self, application)
         self.id = id
         self.app = application
 
@@ -305,7 +305,7 @@ class Tkinter_entry(tk.Entry):
             self.config(fg='grey')
             self.app.labels[0].focus()
 
-        elif self.id == 1:
+        if self.id == 1:
             if self.get() == '':
                 self.insert(0, 'Commentaires')
                 self.config(fg='grey')

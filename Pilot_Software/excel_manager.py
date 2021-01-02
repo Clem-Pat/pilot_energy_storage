@@ -46,13 +46,13 @@ class Excel_manager():
             print("CSV and Excel file created \n")
             old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
             self.app.canvas[0].itemconfig(2, text=f'Fichier {name} créé ({len(self.L_data[0])} valeurs)', fill='green')
-            self.app.fen.after(3000, console_text_back_to_normal)
+            self.app.after(3000, console_text_back_to_normal)
         else:
             lists_lengths = str(','.join([str(len(x)) for x in self.L_data]))
             print(f'Lists must have the same length ! ({lists_lengths}) \n')
             old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
             self.app.canvas[0].itemconfig(2, text=f'Les listes ne sont pas de la même taille !', fill='red')
-            self.app.fen.after(3000, console_text_back_to_normal)
+            self.app.after(3000, console_text_back_to_normal)
 
     def create_excel(self, L_data):
         """crée le fichier excel de l'expérience"""

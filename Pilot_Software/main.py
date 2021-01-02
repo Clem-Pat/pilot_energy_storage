@@ -47,7 +47,7 @@ def main():
                 board.start_motor()
 
         try:
-            app.update()
+            app.refresh()
         except:
             board.exit()
             break

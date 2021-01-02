@@ -10,11 +10,10 @@ import numpy as np
 from tkinter_objects import Tkinter_button, Tkinter_label, Tkinter_scale, Tkinter_canvas, Tkinter_entry
 import main
 
-class Tkinter_window():
+class Tkinter_window(tk.Tk):
 
     def __init__(self, name_of_application, board, init_pot_app=None, parent_app=None):
-
-        self.fen = tk.Tk()
+        tk.Tk.__init__(self)
         self.name = name_of_application
         self.board = board
         self.init_pot_app = init_pot_app
@@ -28,8 +27,8 @@ class Tkinter_window():
         if self.name == 'main':
             self.x, self.y = 470, 0
             self.length, self.height = 800, 800
-            self.fen.title("Interface de pilotage du système de stockage d'énergie")
-            self.fen.configure(bg='light blue')
+            self.title("Interface de pilotage du système de stockage d'énergie")
+            self.configure(bg='light blue')
             self.buttons = [Tkinter_button(self, i) for i in range(5)]
             self.labels = [Tkinter_label(self, i) for i in range(2)]
             self.scales = [Tkinter_scale(self, i) for i in range(1)]
@@ -39,15 +38,15 @@ class Tkinter_window():
 
             self.board.app = self
             self.board.reload()
-            self.fen.bind('<space>', self.buttons[2].motor_start_stop)
+            self.bind('<space>', self.buttons[2].motor_start_stop)
             self.particular_pot_value = [None, None]
             self.plot_demanded = False
 
         elif self.name == 'init_pot_app':
             self.x, self.y = 10, 50
             self.length, self.height = 650, 500
-            self.fen.title('Initialisation potentiomètres')
-            self.fen.configure(bg='grey70')
+            self.title('Initialisation potentiomètres')
+            self.configure(bg='grey70')
             self.buttons = [Tkinter_button(self, i) for i in range(2)]
             self.labels = [Tkinter_label(self, i) for i in range(3)]
             self.objects = [self.buttons, self.labels]
@@ -55,7 +54,7 @@ class Tkinter_window():
         elif self.name == 'plot_app':
             self.x, self.y = -10,0
             self.length, self.height = 480, 650
-            self.fen.title('plot mesures')
+            self.title('plot mesures')
             self.objects = []
             self.figures, self.axes = [0]*10, [0]*10
             self.color = ['b', 'r', 'g', 'c', 'm', 'y', 'k']
@@ -63,24 +62,24 @@ class Tkinter_window():
             self.data_to_plot = [self.board.u_mes_list_plot, self.board.angular_speed_list_plot, self.board.distance_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
 
         self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
-        self.fen.geometry(f'{self.length}x{self.height}+{self.x}+{self.y}')
-        self.fen.resizable(width=False, height=False)
-        self.fen.bind('<Escape>', self.destroy)
-        self.fen.bind('<Control_L>r', self.reload)
-        self.fen.bind('<Control_L>m', self.get_mouse_position)
-        self.fen.bind('<Control_L>p', self.demand_plot)
-        self.fen.bind('<question>', self.print_shortcut)
-        self.fen.protocol('WM_DELETE_WINDOW', self.destroy)
+        self.geometry(f'{self.length}x{self.height}+{self.x}+{self.y}')
+        self.resizable(width=False, height=False)
+        self.bind('<Escape>', self.kill)
+        self.bind('<Control_L>r', self.reload)
+        self.bind('<Control_L>m', self.get_mouse_position)
+        self.bind('<Control_L>p', self.demand_plot)
+        self.bind('<question>', self.print_shortcut)
+        self.protocol('WM_DELETE_WINDOW', self.kill)
 
         self.place_all_objects()
-        self.update()
+        self.refresh()
         self.mouse_click(position = self.center_position)
 
     def reload(*args):
         self = args[0]
         if self.parent_app != None:
             self.parent_app.reload()
-        try: self.destroy()
+        try: self.kill()
         except: pass
         main.main()
 
@@ -91,7 +90,7 @@ class Tkinter_window():
             if self.plot_demanded:
                 self.plot_app = Tkinter_window('plot_app', self.board, parent_app=self)
             else:
-                self.plot_app.destroy()
+                self.plot_app.kill()
 
     def plot_mesures(*args):
         def plot(plot_app, x_axis, y_axis_list):
@@ -106,12 +105,12 @@ class Tkinter_window():
                 plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_to_plot_name[i], marker='+', ls='-')
                 plot_app.axes[i].legend(loc='best', shadow=True, fontsize='small', markerscale=0.4)   #Ajouter une légende qui s'affiche au mieux sur le graphe
                 try:
-                    canvas = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app.fen).get_tk_widget()
+                    canvas = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app).get_tk_widget()
                     canvas.place(x=0,y=n*i)
                 except:
                     pass
             plot_app.axes[0].set(xlabel='temps (s)')
-            plot_app.fen.update()
+            plot_app.refresh()
 
         self = args[0]
         plot(self, self.board.time_list_plot, self.data_to_plot)
@@ -136,7 +135,7 @@ class Tkinter_window():
             self.last_tick_t = time.time()
             self.tick = 0
 
-    def update(self):
+    def refresh(self):
         if self.name == 'main':
             self.canvas[1].itemconfig(3, text=self.readable_time())
             self.canvas[1].itemconfig(5, text='{:.3f}'.format(self.board.u_mes)) #avec que 3 décimales
@@ -145,7 +144,7 @@ class Tkinter_window():
 
 
             if self.init_pot_app != None:
-                try:self.init_pot_app.update()
+                try:self.init_pot_app.refresh()
                 except:self.init_pot_app = None
 
         elif self.name == 'init_pot_app':
@@ -157,33 +156,33 @@ class Tkinter_window():
         self.tick += 1
         if self.name == 'main':
             self.get_and_update_fps()
-        self.fen.update()
+        self.update()
 
     def place_all_objects(self):
         for list_objects in self.objects:
             for object in list_objects:
                 object.place(x=object.x, y=object.y)
 
-    def destroy(*args):
+    def kill(*args):
         self = args[0]
-        if str(self.fen.focus_get())[:14] == '.!tkinterentry' or str(self.fen.focus_get())[:15] == '.!tkinterbutton':
-            self.fen.focus_get().unfocus()
+        if str(self.focus_get())[:15] == '.!tkinter_entry' or str(self.focus_get())[:16] == '.!tkinter_button':
+            self.focus_get().unfocus()
         else:
             if self.name == 'main':
                 if self.plot_app == None and self.init_pot_app == None:
-                    self.fen.destroy()
+                    self.destroy()
                 if self.init_pot_app != None:
-                    self.init_pot_app.destroy()
+                    self.init_pot_app.kill()
                 if self.plot_app != None:
-                    self.plot_app.destroy()
+                    self.plot_app.kill()
 
             if self.name == 'init_pot_app':
-                try: self.fen.destroy()
+                try: self.destroy()
                 except: pass
                 self.parent_app.init_pot_app = None
 
             if self.name == 'plot_app':
-                try: self.fen.destroy()
+                try: self.destroy()
                 except: pass
                 self.parent_app.plot_demanded = False
                 self.parent_app.plot_app = None
