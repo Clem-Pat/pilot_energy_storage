@@ -36,7 +36,7 @@ class Excel_manager():
         return folder_path
 
     def data_from_list_to_dict(self,L_data):
-        return {"Temps (s)": L_data[0], "Tension mesurée (V)": L_data[1], "Position Angulaire (rad)": L_data[2], "Vitesse rotation (rad/s)": L_data[3],  "Distance mesurée (cm)": L_data[4], "Bits envoyés": L_data[5], "Moteur allumé" : L_data[6]}
+        return {"Temps (s)": L_data[0], "Tension mesurée (V)": L_data[1], "Intensité mesurée (A)": L_data[2], "Position Angulaire (rad)": L_data[3], "Vitesse rotation (rad/s)": L_data[4],  "Distance mesurée (cm)": L_data[5], "Bits envoyés": L_data[6], "Moteur allumé" : L_data[7]}
 
     def print_in_console(self, successed, name):
         def console_text_back_to_normal():

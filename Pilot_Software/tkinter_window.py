@@ -6,7 +6,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 # import matplotlib.pyplot as plt
 import numpy as np
-
+import sys
 from tkinter_objects import Tkinter_button, Tkinter_label, Tkinter_scale, Tkinter_canvas, Tkinter_entry
 import main
 
@@ -23,6 +23,7 @@ class Tkinter_window(tk.Tk):
         self.last_tick_t = time.time()
         self.fps = 1
         self.tick = 0
+        self.offset = 0
 
         if self.name == 'main':
             self.x, self.y = 470, 0
@@ -52,14 +53,15 @@ class Tkinter_window(tk.Tk):
             self.objects = [self.buttons, self.labels]
 
         elif self.name == 'plot_app':
-            self.x, self.y = -10,0
+            self.x, self.y = -10, 0 #-10,0
             self.length, self.height = 480, 650
             self.title('plot mesures')
-            self.objects = []
+            self.data_to_plot_name = ['u_mes', 'i_mes', 'speed', 'dist', 'motor_on']
+            self.data_to_plot = [self.board.u_mes_list_plot, self.board.i_mes_list_plot, self.board.angular_speed_list_plot, self.board.distance_list_plot, self.board.motor_is_on_list_plot]
+            self.frames = [Plot_frame(self, i, name=self.data_to_plot_name[i]) for i in range(len(self.data_to_plot))]
+            self.objects = [self.frames]
             self.figures, self.axes = [0]*10, [0]*10
             self.color = ['b', 'r', 'g', 'c', 'm', 'y', 'k']
-            self.data_to_plot_name = ['u_mes', 'speed', 'dist', 'bits', 'motor_on']
-            self.data_to_plot = [self.board.u_mes_list_plot, self.board.angular_speed_list_plot, self.board.distance_list_plot, self.board.bits_list_plot, self.board.motor_is_on_list_plot]
 
         self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
         self.geometry(f'{self.length}x{self.height}+{self.x}+{self.y}')
@@ -70,6 +72,7 @@ class Tkinter_window(tk.Tk):
         self.bind('<Control_L>p', self.demand_plot)
         self.bind('<question>', self.print_shortcut)
         self.protocol('WM_DELETE_WINDOW', self.kill)
+        self.bind_all("<MouseWheel>", self.scroll)
 
         self.place_all_objects()
         self.refresh()
@@ -92,28 +95,28 @@ class Tkinter_window(tk.Tk):
             else:
                 self.plot_app.kill()
 
-    def plot_mesures(*args):
-        def plot(plot_app, x_axis, y_axis_list):
-            for i in range(len(y_axis_list)):
-                if len(y_axis_list) <= 4:
-                    plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=100)
-                    n = 160
-                if len(y_axis_list) == 5:
-                    plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=90)
-                    n = 123
-                plot_app.axes[i] = plot_app.figures[i].add_subplot(111)
-                plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_to_plot_name[i], marker='+', ls='-')
-                plot_app.axes[i].legend(loc='best', shadow=True, fontsize='small', markerscale=0.4)   #Ajouter une légende qui s'affiche au mieux sur le graphe
-                try:
-                    canvas = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app).get_tk_widget()
-                    canvas.place(x=0,y=n*i)
-                except:
-                    pass
-            plot_app.axes[0].set(xlabel='temps (s)')
-            plot_app.refresh()
-
-        self = args[0]
-        plot(self, self.board.time_list_plot, self.data_to_plot)
+    # def plot_mesures(*args):
+    #     def plot(plot_app, x_axis, y_axis_list):
+    #         for i in range(len(y_axis_list)):
+    #             if len(y_axis_list) <= 4:
+    #                 plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=100)
+    #                 n = 160
+    #             if len(y_axis_list) == 5:
+    #                 plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=90)
+    #                 n = 123
+    #             plot_app.axes[i] = plot_app.figures[i].add_subplot(111)
+    #             plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_to_plot_name[i], marker='+', ls='-')
+    #             plot_app.axes[i].legend(loc='best', shadow=True, fontsize='small', markerscale=0.4)   #Ajouter une légende qui s'affiche au mieux sur le graphe
+    #             try:
+    #                 canvas = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app).get_tk_widget()
+    #                 canvas.place(x=0,y=n*i+self.offset)
+    #             except:
+    #                 pass
+    #         plot_app.axes[0].set(xlabel='temps (s)')
+    #         plot_app.refresh()
+    #
+    #     self = args[0]
+    #     plot(self, self.board.time_list_plot, self.data_to_plot)
 
     def readable_time(self):
         t = time.time() - self.t0
@@ -147,11 +150,22 @@ class Tkinter_window(tk.Tk):
                 try:self.init_pot_app.refresh()
                 except:self.init_pot_app = None
 
+            if self.plot_app != None:
+                try:self.plot_app.refresh()
+                except:self.plot_app = None
+
         elif self.name == 'init_pot_app':
             if self.parent_app.particular_pot_value[0] == None :
                 self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.angular_position))
             if self.parent_app.particular_pot_value[1] == None :
                 self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.angular_position))
+
+        elif self.name == 'plot_app':
+            for list_objects in self.objects:
+                for object in list_objects:
+                    if type(object).__name__ == 'Plot_frame':
+                        object.refresh()
+            pass
 
         self.tick += 1
         if self.name == 'main':
@@ -209,3 +223,90 @@ class Tkinter_window(tk.Tk):
 
     def print_shortcut(*args):
         print("échap : Détruire l'app\nctrl+r : Recharger l'app\nctrl+m : Afficher la position de la souris dans l'app\nctrl+entrée : cliquer\nespace : Démarrer/Arrêter le moteur\nctrl+p : plot la dernière acquisition \nmaj+? : Aide raccourcis\n")
+
+    def scroll(*args):
+        self, event = args[0], args[1]
+        for list_objects in self.objects:
+            for object in list_objects:
+                if self.offset + event.delta/50 <= 0:
+                    self.offset += event.delta/50
+                    object.y += event.delta/50
+                else:
+                    self.offset = 0
+                    object.y = object.init_y
+                object.place(x=object.x, y=object.y)
+
+class Point():
+    def __init__(self, master, x, y, color='black'):
+        self.master = master
+        self.x, self.y = x, y
+        self.color = color
+        self = [self.master.create_line(self.x-10, self.y, self.x+10, self.y, fill=self.color),
+                                   self.master.create_line(selfself.x, self.y-10, self.x, self.y+10, fill=self.color)]
+
+
+class Plot_frame(tk.Canvas):
+    def __init__(self, parent_app, id, name=None):
+        tk.Canvas.__init__(self, parent_app)
+        self.id = id
+        self.app = parent_app
+        self.name = name
+        self.x_axis, self.y_axis = [], []
+        self.height, self.width = 130, 480
+        self.config(bg='white', height=self.height, width=self.width, relief='raised')
+        self.x, self.y = 0, 5 + 130*self.id
+        self.create_text(15, 10, anchor='w', text=self.name, font='Arial 10 italic bold')
+        self.points, self.points_coords, self.continuous_lines = [], [], []
+        self.cross_size, self.padding = 5, 5
+        self.precision = 3
+        self.legends, self.plot_legends = [[], []], True
+        self.create_axis()
+        self.init_y = self.y
+        
+    def refresh(self):
+        self.x_axis = self.app.board.time_list_plot
+        self.y_axis = self.app.data_to_plot[self.id]
+        if self.points != []:
+            for point in self.points:
+                self.delete(point[0])
+                self.delete(point[1]) #destroy les deux lignes du point
+        if self.continuous_lines != []:
+            for line in self.continuous_lines:
+                self.delete(line)
+        self.points, self.points_coords, self.continuous_lines = [], [], []
+        for i in range(len(self.x_axis)):
+            self.create_point(self.x_axis[i], self.y_axis[i])
+
+        if self.x_axis != [] and self.plot_legends:
+            self.update_legends()
+
+        self.app.update()
+
+    def create_point(self, x, y, create_lines=True):
+        maxi = max(np.abs(max(self.y_axis)), np.abs(min(self.y_axis)))
+        if min(self.y_axis) == max(self.y_axis):
+            y = y + self.padding*2 + int((self.height-self.padding*4)/2)
+        else:
+            y = int(y*(self.padding*6-self.height)/(2*maxi)+(self.height/2))
+
+        x = self.x_axis.index(x)*int((self.width-self.padding*4)/self.app.board.plot_limit) + self.padding*2
+        self.points.append([self.create_line(x-self.cross_size, y, x+self.cross_size, y, fill='blue', width=2), self.create_line(x, y-self.cross_size, x, y+self.cross_size, fill='blue', width=2)])
+        self.points_coords.append([x,y])
+        if create_lines and len(self.points_coords) >= 2:
+            self.continuous_lines.append(self.create_line(self.points_coords[-2][0], self.points_coords[-2][1], self.points_coords[-1][0], self.points_coords[-1][1], fill='grey'))
+
+    def create_axis(self):
+        self.create_line(self.padding*2, self.height-(self.padding*2), self.padding*2, self.padding*2)    # y_axis
+        self.create_line(self.padding*2, self.height-(self.padding*2), self.width-self.padding*2, self.height-self.padding*2) # x_axis
+
+        if self.plot_legends:
+            self.create_line((self.padding*2)-self.cross_size, self.padding*3, self.padding*2+self.cross_size, self.padding*3)
+            self.create_line((self.padding*2)-self.cross_size, int(self.height/2), self.padding*2+self.cross_size, int(self.height/2))
+            self.create_line((self.padding*2)-self.cross_size, self.height-self.padding*3, self.padding*2+self.cross_size, self.height-self.padding*3)
+            for i in range(self.precision+1):
+                self.legends[0].append(self.create_text(int(i*(self.width-20)/self.precision)+self.padding*2, self.height-(self.padding*2)+self.cross_size, text=' '))
+                # self.legends[1].append(self.create_text((self.padding*2)-self.cross_size, int(((self.height+2*self.padding*3)/2)-self.padding*3), text=' ')) #Les textes de légende des ordonnées pas bien placés
+
+    def update_legends(self):
+        for i in range(self.precision+1):
+            self.itemconfigure(self.legends[0][i], text='{:.1f}'.format(float(((max(self.x_axis)-min(self.x_axis))*(i))/self.precision)+min(self.x_axis)))

@@ -32,14 +32,15 @@ class Arduino_uno_board():
         self.pin = None
         self.pulley_radius = 5 #cm
         self.pilot_mode = 'manual'
-        self.u_mes, self.angular_position, self.angular_speed, self.distance, self.motor_is_on = 0, 0, 0, 0, False
+        self.u_mes, self.i_mes, self.angular_position, self.angular_speed, self.distance, self.motor_is_on = 0, 0, 0, 0, 0, False
         self.record_demanded = False
         self.record_period = 0.1  # période d'acquisition en secondes
-        self.t0_record, self.time_list, self.u_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list = time.time(), [0], [0.0], [self.angular_position], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
-        self.time_list_plot, self.u_mes_list_plot, self.angular_speed_list_plot, self.distance_list_plot, self.bits_list_plot, self.motor_is_on_list_plot = [0], [0], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
+        self.t0_record, self.time_list, self.u_mes_list, self.i_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list = time.time(), [0], [0.0], [0], [self.angular_position], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
+        self.time_list_plot, self.u_mes_list_plot, self.i_mes_list_plot, self.angular_speed_list_plot, self.distance_list_plot, self.bits_list_plot, self.motor_is_on_list_plot = [0], [0], [0], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.excel_manager = Excel_manager(self.app)
         self.angular_counter, self.old_clk, self.old_dt = 0, True, True
+        self.plot_limit = 30
 
 
 
@@ -103,6 +104,9 @@ class Arduino_uno_board():
         else:
             return 0
 
+    def get_ammeter_value(self):
+        return 0
+
     def get_angular_position_value(self):
         """returns angular position mesured in degrees"""
         if self.arduinoboard != None :
@@ -160,7 +164,7 @@ class Arduino_uno_board():
             self.pin['d9'].write(int(self.app.scales[0].value) / 255)
 
     def start_recording(self):
-        self.t0_record, self.time_list, self.u_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list = time.time(), [0], [0.0], [self.angular_position], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
+        self.t0_record, self.time_list, self.u_mes_list, self.i_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list = time.time(), [0], [0.0], [0], [self.angular_position], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
         self.record_demanded = True
 
     def record_mesures(self):
@@ -168,6 +172,7 @@ class Arduino_uno_board():
             if (time.time() - self.t0_record) - self.time_list[-1] >= self.record_period:
                 self.time_list.append(time.time() - self.t0_record)
                 self.u_mes_list.append(self.u_mes)
+                self.i_mes_list.append(self.i_mes)
                 self.angular_position_list.append(self.angular_position)
                 self.angular_speed_list.append(self.angular_speed)
                 self.distance_list.append(self.distance)
@@ -177,23 +182,26 @@ class Arduino_uno_board():
         if (time.time() - self.app.t0) - self.time_list_plot[-1] >= self.record_period:
             self.time_list_plot.append(time.time() - self.app.t0)
             self.u_mes_list_plot.append(self.u_mes)
+            self.i_mes_list_plot.append(self.i_mes)
             self.angular_speed_list_plot.append(self.angular_speed)
             self.distance_list_plot.append(self.distance)
             self.bits_list_plot.append(self.app.scales[0].value)
             self.motor_is_on_list_plot.append(int(self.motor_is_on))
 
-            if len(self.time_list_plot) > 30:
+            if len(self.time_list_plot) > self.plot_limit:
                 self.time_list_plot.pop(0)
                 self.u_mes_list_plot.pop(0)
+                self.i_mes_list_plot.pop(0)
                 self.angular_speed_list_plot.pop(0)
                 self.distance_list_plot.pop(0)
                 self.bits_list_plot.pop(0)
                 self.motor_is_on_list_plot.pop(0)
 
             if self.app.plot_app != None:
-                self.app.plot_app.plot_mesures()
+                # self.app.plot_app.plot_mesures()
+                pass
 
     def stop_recording(self):
         self.record_demanded = False
-        L_data = [self.time_list, self.u_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list]
+        L_data = [self.time_list, self.u_mes_list, self.i_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list]
         self.excel_manager.create_excel(L_data)

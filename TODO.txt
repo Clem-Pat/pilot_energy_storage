@@ -1,3 +1,3 @@
 - module Python profile pour analyser la complexité des fonctions : cProfile
-(besoin car le plot des data est gourmand en temps de calculs)
-  
+
+- rendre l'ajout d'acquisition des données plus simple (il faut rajouter "i_mes" plein de fois partout dans le projet)

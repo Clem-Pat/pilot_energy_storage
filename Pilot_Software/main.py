@@ -35,6 +35,7 @@ def main():
 
     while True:
         board.u_mes = board.get_voltmeter_value()
+        board.i_mes = board.get_ammeter_value()
         board.angular_position = board.get_angular_position_value()
         board.angular_speed = board.get_angular_speed_value()
         board.distance = board.get_distance_value()

@@ -59,6 +59,7 @@ class Tkinter_button(tk.Button):
                 self.x, self.y = 350, 200
 
         self.bind('<Return>', self.command)
+        self.init_y = self.y
 
     def acquisition(*args):
         self = args[0]
@@ -160,6 +161,7 @@ class Tkinter_label(tk.Label):
                 self.config(text='Valeur 90 potentiomètre : {}'.format(self.app.buttons[1].value), bg='grey70',
                             fg='black', font='Arial 10')
                 self.x, self.y = 350, 300
+        self.init_y = self.y
 
 
 class Tkinter_scale(tk.Scale):
@@ -178,6 +180,8 @@ class Tkinter_scale(tk.Scale):
                 self.bg, self.fg, self.cursor = 'light blue', 'black', 'hand2'
                 self.config(label='Vitesse Moteur', orient='horizontal', to=255, cursor=self.cursor, font='Arial 10',
                             resolution=1, tickinterval=25, length=350, bg=self.bg, fg=self.fg, command=self.get_value)
+        self.init_y = self.y
+
 
     def get_value(self, value):
         self.value = value
@@ -238,6 +242,7 @@ class Tkinter_canvas(tk.Canvas):
             self.create_line(100, 40, 100, 130)
             self.create_line(200, 40, 200, 130)
             self.create_line(300, 40, 300, 130)
+        self.init_y = self.y
 
 
 class Tkinter_entry(tk.Entry):
@@ -264,6 +269,8 @@ class Tkinter_entry(tk.Entry):
                 self.bind('<Button-1>', self.type)
                 self.bind_all('<Key>', self.type)
                 self.x, self.y = 630, 522
+        self.init_y = self.y
+
 
     def enter(self, state):
         if self.id == 0:
@@ -283,6 +290,7 @@ class Tkinter_entry(tk.Entry):
                 self.insert(0, 'Commentaires')
                 self.config(fg='grey')
                 self.app.labels[0].focus()
+
 
     def type(*args):
         self, event = args[0], args[1]
