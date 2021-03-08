@@ -4,7 +4,6 @@ from pynput.mouse import Button, Controller
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-# import matplotlib.pyplot as plt
 import numpy as np
 import sys
 from tkinter_objects import Tkinter_button, Tkinter_label, Tkinter_scale, Tkinter_canvas, Tkinter_entry
@@ -53,7 +52,7 @@ class Tkinter_window(tk.Tk):
             self.objects = [self.buttons, self.labels]
 
         elif self.name == 'plot_app':
-            self.x, self.y = -10, 0 #-10,0
+            self.x, self.y = -10, 0
             self.length, self.height = 480, 650
             self.title('plot mesures')
             self.data_to_plot_name = ['u_mes', 'i_mes', 'speed', 'dist', 'motor_on']
@@ -94,29 +93,6 @@ class Tkinter_window(tk.Tk):
                 self.plot_app = Tkinter_window('plot_app', self.board, parent_app=self)
             else:
                 self.plot_app.kill()
-
-    # def plot_mesures(*args):
-    #     def plot(plot_app, x_axis, y_axis_list):
-    #         for i in range(len(y_axis_list)):
-    #             if len(y_axis_list) <= 4:
-    #                 plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=100)
-    #                 n = 160
-    #             if len(y_axis_list) == 5:
-    #                 plot_app.figures[i] = Figure(figsize=(5, 1.7), dpi=90)
-    #                 n = 123
-    #             plot_app.axes[i] = plot_app.figures[i].add_subplot(111)
-    #             plot_app.axes[i].plot(x_axis, y_axis_list[i], plot_app.color[i], label=plot_app.data_to_plot_name[i], marker='+', ls='-')
-    #             plot_app.axes[i].legend(loc='best', shadow=True, fontsize='small', markerscale=0.4)   #Ajouter une légende qui s'affiche au mieux sur le graphe
-    #             try:
-    #                 canvas = FigureCanvasTkAgg(plot_app.figures[i], master=plot_app).get_tk_widget()
-    #                 canvas.place(x=0,y=n*i+self.offset)
-    #             except:
-    #                 pass
-    #         plot_app.axes[0].set(xlabel='temps (s)')
-    #         plot_app.refresh()
-    #
-    #     self = args[0]
-    #     plot(self, self.board.time_list_plot, self.data_to_plot)
 
     def readable_time(self):
         t = time.time() - self.t0
@@ -236,6 +212,7 @@ class Tkinter_window(tk.Tk):
                     object.y = object.init_y
                 object.place(x=object.x, y=object.y)
 
+
 class Point():
     def __init__(self, master, x, y, color='black'):
         self.master = master
@@ -262,7 +239,7 @@ class Plot_frame(tk.Canvas):
         self.legends, self.plot_legends = [[], []], True
         self.create_axis()
         self.init_y = self.y
-        
+
     def refresh(self):
         self.x_axis = self.app.board.time_list_plot
         self.y_axis = self.app.data_to_plot[self.id]

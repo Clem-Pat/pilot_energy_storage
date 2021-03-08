@@ -1,3 +1,5 @@
 - module Python profile pour analyser la complexité des fonctions : cProfile
 
 - rendre l'ajout d'acquisition des données plus simple (il faut rajouter "i_mes" plein de fois partout dans le projet)
+
+- GROS PB : speed est calculée depuis angular_position_list qui est construite seulement en cas d'acquisition !!
