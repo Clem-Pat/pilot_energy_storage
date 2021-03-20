@@ -226,7 +226,7 @@ class Tkinter_canvas(tk.Canvas):
                              font='Arial 8 italic', fill='black')
             self.create_text(50, 70, text='',
                              font='Arial 8 italic', fill='black')
-            self.create_text(150, 45, text='Tension mesurée',
+            self.create_text(150, 45, text='Courant mesuré',
                              font='Arial 8 italic', fill='black')
             self.create_text(150, 70, text='',
                              font='Arial 8 italic', fill='black')

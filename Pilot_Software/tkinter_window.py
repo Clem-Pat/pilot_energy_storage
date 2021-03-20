@@ -117,7 +117,7 @@ class Tkinter_window(tk.Tk):
     def refresh(self):
         if self.name == 'main':
             self.canvas[1].itemconfig(3, text=self.readable_time())
-            self.canvas[1].itemconfig(5, text='{:.3f}'.format(self.board.u_mes)) #avec que 3 décimales
+            self.canvas[1].itemconfig(5, text='{:.3f}'.format(self.board.i_mes)) #avec que 3 décimales
             self.canvas[1].itemconfig(7, text='{:.3f}'.format(self.board.distance))
             self.canvas[1].itemconfig(9, text='{:.3f}'.format(self.board.angular_speed))
 

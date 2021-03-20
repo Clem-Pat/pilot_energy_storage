@@ -106,13 +106,14 @@ class Arduino_uno_board():
     def get_voltmeter_value(self):
         """returns tension mesured in volts"""
         if self.arduinoboard != None:
-            return (self.pin['A0'].read())*5
+            return 0.039971*self.pin['A0'].read()
         else:
             return 0
 
     def get_ammeter_value(self):
         if self.arduinoboard != None :
-            return (self.pin['A1'].read())*5
+            # return 10*(self.pin['A1'].read()-0.5)
+            return 0.5642*self.pin['A1'].read()
         else:
             return 0
 

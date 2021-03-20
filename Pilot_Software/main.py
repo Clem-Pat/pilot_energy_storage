@@ -15,8 +15,6 @@ Hbridge IN3 pin d7
         IN4 pin d8
         ENB pin d9'''
 '''740g 0,75cL'''
-# Sensor pin A1
-# Tachymeter pin A2
 
 def main():
     port = 'COM7'
@@ -37,8 +35,7 @@ def main():
             if not board.motor_is_on and board.distance >= 10 and not board.motor_is_forced:
                 board.start_motor()
 
-        try:
-            app.refresh()
+        try: app.refresh()
         except:
             board.exit()
             break
