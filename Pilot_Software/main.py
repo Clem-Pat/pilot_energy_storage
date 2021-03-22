@@ -8,6 +8,7 @@ import tkinter_window
 '''
 Voltmeter pin A0
 Ammeter pin A1
+Voltmeter 2 pin A2
 Encoder SW pin d2
         DT pin d3
         CLK pin d4
@@ -22,7 +23,8 @@ def main():
     app = tkinter_window.Tkinter_window('main', board)
 
     while True:
-        board.u_mes = board.get_voltmeter_value()
+        board.u_mes = board.get_voltmeter_value(1)
+        board.u_mes2 = board.get_voltmeter_value(2)
         board.i_mes = board.get_ammeter_value()
         board.angular_position = board.get_angular_position_value()
         board.angular_speed = board.get_angular_speed_value()

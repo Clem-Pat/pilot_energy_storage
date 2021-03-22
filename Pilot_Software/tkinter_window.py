@@ -8,6 +8,7 @@ import numpy as np
 import sys
 from tkinter_objects import Tkinter_button, Tkinter_label, Tkinter_scale, Tkinter_canvas, Tkinter_entry
 import main
+import os
 
 class Tkinter_window(tk.Tk):
 
@@ -23,6 +24,7 @@ class Tkinter_window(tk.Tk):
         self.fps = 1
         self.tick = 0
         self.offset = 0
+        self.last_excel_created = None
 
         if self.name == 'main':
             self.x, self.y = 470, 0
@@ -69,6 +71,7 @@ class Tkinter_window(tk.Tk):
         self.bind('<Control_L>r', self.reload)
         self.bind('<Control_L>m', self.get_mouse_position)
         self.bind('<Control_L>p', self.demand_plot)
+        self.bind('<Control_L>o', self.open_excel)
         self.bind('<question>', self.print_shortcut)
         self.protocol('WM_DELETE_WINDOW', self.kill)
         self.bind_all("<MouseWheel>", self.scroll)
@@ -196,6 +199,11 @@ class Tkinter_window(tk.Tk):
             mouse.position = self.parent_app.center_position
             mouse.press(Button.left)
             mouse.release(Button.left)
+
+    def open_excel(*args):
+        self = args[0]
+        if self.last_excel_created != None: os.startfile(self.last_excel_created)
+        else: print('no last excel created to open')
 
     def print_shortcut(*args):
         print("échap : Détruire l'app\nctrl+r : Recharger l'app\nctrl+m : Afficher la position de la souris dans l'app\nctrl+entrée : cliquer\nespace : Démarrer/Arrêter le moteur\nctrl+p : plot la dernière acquisition \nmaj+? : Aide raccourcis\n")

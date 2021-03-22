@@ -21,8 +21,8 @@ class Excel_manager():
             while os.path.isfile(path+f'\\{name}_TEST({i}).csv'): i += 1
             name =  f'{name}_TEST({i})'
         else:
-            while os.path.isfile(path+f'{name}({i}).csv'): i += 1
-            name =  f'{name}_TEST({i})'
+            while os.path.isfile(path+f'\\{name}({i}).csv'): i += 1
+            name =  f'{name}({i})'
         print(f'will create {name} ({len(self.data_dic["Temps (s)"])} values) at :')
         print(path+'\\'+name+'.csv')
         return name
@@ -38,9 +38,9 @@ class Excel_manager():
 
     def data_from_list_to_dict(self,L_data):
         """translates the list of data to dictionnary (useful for excel creation)"""
-        return {"Temps (s)": L_data[0], "Tension mesurée (V)": L_data[1], "Intensité mesurée (A)": L_data[2], "Position Angulaire (rad)": L_data[3], "Vitesse rotation (rad/s)": L_data[4],  "Distance mesurée (cm)": L_data[5], "Bits envoyés": L_data[6], "Moteur allumé" : L_data[7]}
+        return {"Temps (s)": L_data[0], "Tension mesurée (V)": L_data[1], "Tension mesurée 2 (V)": L_data[2], "Intensité mesurée (A)": L_data[3], "Position Angulaire (rad)": L_data[4], "Vitesse rotation (rad/s)": L_data[5],  "Distance mesurée (cm)": L_data[6], "Bits envoyés": L_data[7], "Moteur allumé" : L_data[8]}
 
-    def print_in_console(self, successed, name):
+    def print_in_console(self, successed, path, name):
         """send a message back to the user in the console of the application"""
         def console_text_back_to_normal():
             self.app.canvas[0].itemconfig(2, text=old_text, fill=old_color)
@@ -49,6 +49,7 @@ class Excel_manager():
             print("CSV and Excel file created \n")
             old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
             self.app.canvas[0].itemconfig(2, text=f'Fichier {name} créé ({len(self.L_data[0])} valeurs)', fill='green')
+            self.app.last_excel_created = f'{path}/{name}.xlsx'
             self.app.after(3000, console_text_back_to_normal)
         else:
             lists_lengths = str(','.join([str(len(x)) for x in self.L_data]))
@@ -71,6 +72,6 @@ class Excel_manager():
             read_file = pd.read_excel(f'{path}/{name}.xlsx')
             read_file.to_csv(f'{path}/{name}.csv', index=False, header=True)
 
-            self.print_in_console(True, name)
+            self.print_in_console(True, path, name)
         else:
-            self.print_in_console(False, None)
+            self.print_in_console(False, None, None)

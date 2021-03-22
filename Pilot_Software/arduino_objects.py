@@ -9,6 +9,7 @@ from excel_manager import Excel_manager
 '''
 Voltmeter pin A0
 Ammeter pin A1
+Voltmeter 2 pin A2
 Encoder SW pin d2
         DT pin d3
         CLK pin d4
@@ -36,12 +37,13 @@ class Arduino_uno_board():
         self.pin = None
         self.pulley_radius = 5 #cm
         self.pilot_mode = 'manual'
-        self.u_mes, self.i_mes, self.angular_speed, self.distance, self.motor_is_on = 0, 0, 0, 0, False
+        self.u_mes, self.u_mes2, self.i_mes, self.angular_speed, self.distance, self.motor_is_on = 0, 0, 0, 0, 0, False
+        self.i_mes_moy, self.u_mes_moy, self.nbre_mesures = 0, 0, 0
         self.last_angular_position_time, self.last_angular_position = time.time(), 0
         self.angular_position_time, self.angular_position = time.time(), 0
         self.record_demanded = False
         self.record_period = 0.1  # période d'acquisition en secondes
-        self.t0_record, self.time_list, self.u_mes_list, self.i_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list = time.time(), [0], [0.0], [0], [self.angular_position], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
+        self.t0_record, self.time_list, self.u_mes_list, self.u_mes2_list, self.i_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list = time.time(), [0], [0.0], [0], [0], [self.angular_position], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
         self.time_list_plot, self.u_mes_list_plot, self.i_mes_list_plot, self.angular_speed_list_plot, self.distance_list_plot, self.bits_list_plot, self.motor_is_on_list_plot = [0], [0], [0], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
         self.path = os.path.dirname(os.path.abspath(__file__))
         self.excel_manager = Excel_manager(self.app)
@@ -103,10 +105,13 @@ class Arduino_uno_board():
         if self.arduinoboard != None:
             self.arduinoboard.exit()
 
-    def get_voltmeter_value(self):
+    def get_voltmeter_value(self, id):
         """returns tension mesured in volts"""
         if self.arduinoboard != None:
-            return 0.039971*self.pin['A0'].read()
+            if id == 1:
+                return 0.039971*self.pin['A0'].read()
+            elif id == 2:
+                return 3*5*self.pin['A2'].read()
         else:
             return 0
 
@@ -181,20 +186,27 @@ class Arduino_uno_board():
             self.pin['d9'].write(int(self.app.scales[0].value) / 255)
 
     def start_recording(self):
-        self.t0_record, self.time_list, self.u_mes_list, self.i_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list = time.time(), [0], [0.0], [0], [self.angular_position], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
+        self.t0_record, self.time_list, self.u_mes_list, self.u_mes2_list, self.i_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list = time.time(), [0], [0.0], [0], [0], [self.angular_position], [self.angular_speed], [self.distance], [0], [int(self.motor_is_on)]
         self.record_demanded = True
 
     def record_mesures(self):
+        self.u_mes_moy += self.u_mes
+        self.i_mes_moy += self.i_mes
+        self.nbre_mesures += 1
+
         if self.record_demanded == True:
             if (time.time() - self.t0_record) - self.time_list[-1] >= self.record_period:
+                self.u_mes, self.i_mes = self.u_mes_moy/self.nbre_mesures, self.i_mes_moy/self.nbre_mesures
                 self.time_list.append(time.time() - self.t0_record)
                 self.u_mes_list.append(self.u_mes)
-                self.i_mes_list.append(self.i_mes)
+                self.u_mes2_list.append(self.u_mes2)
+                self.i_mes_list.append(self.i_mes_moy)
                 self.angular_position_list.append(self.angular_position)
                 self.angular_speed_list.append(self.angular_speed)
                 self.distance_list.append(self.distance)
                 self.bits_list.append(self.app.scales[0].value)
                 self.motor_is_on_list.append(int(self.motor_is_on))
+                self.u_mes_moy, self.i_mes_moy, self.nbre_mesures = 0, 0, 0
 
         if (time.time() - self.app.t0) - self.time_list_plot[-1] >= self.record_period:
             self.time_list_plot.append(time.time() - self.app.t0)
@@ -220,5 +232,5 @@ class Arduino_uno_board():
 
     def stop_recording(self):
         self.record_demanded = False
-        L_data = [self.time_list, self.u_mes_list, self.i_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list]
+        L_data = [self.time_list, self.u_mes_list, self.u_mes2_list, self.i_mes_list, self.angular_position_list, self.angular_speed_list, self.distance_list, self.bits_list, self.motor_is_on_list]
         self.excel_manager.create_excel(L_data)
