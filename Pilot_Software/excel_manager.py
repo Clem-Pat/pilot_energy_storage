@@ -50,6 +50,7 @@ class Excel_manager():
             old_text, old_color = self.app.canvas[0].itemcget(2, 'text'), self.app.canvas[0].itemcget(2, 'fill')
             self.app.canvas[0].itemconfig(2, text=f'Fichier {name} créé ({len(self.L_data[0])} valeurs)', fill='green')
             self.app.last_excel_created = f'{path}/{name}.xlsx'
+            self.app.excel_created.append(self.app.last_excel_created)
             self.app.after(3000, console_text_back_to_normal)
         else:
             lists_lengths = str(','.join([str(len(x)) for x in self.L_data]))

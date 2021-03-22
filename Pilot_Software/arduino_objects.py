@@ -50,8 +50,6 @@ class Arduino_uno_board():
         self.angular_counter, self.old_clk, self.old_dt = 0, True, True
         self.plot_limit = 30
 
-
-
     def reload(self):
         self.excel_manager = Excel_manager(self.app)
 

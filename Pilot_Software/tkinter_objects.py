@@ -1,6 +1,7 @@
 import tkinter as tk
 from pynput.mouse import Button, Controller
 import time
+import os
 
 import tkinter_window
 
@@ -34,29 +35,10 @@ class Tkinter_button(tk.Button):
                 self.x, self.y = 460, 290
 
             if self.id == 3:
-                self.bg, self.fg, self.cursor, self.command = 'blue', 'black', 'hand2', self.initialiser_potentiometres
-                self.config(command=self.command, width=16, height=2,
-                            text='Init Potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor, font='Arial 11 bold')
-                self.x, self.y = 460, 460
-
-            if self.id == 4:
                 self.bg, self.fg, self.cursor, self.command = 'green3', 'black', 'hand2', self.acquisition
                 self.config(command=self.command, width=16, height=2,
                             text='Débuter Acquisition', bg=self.bg, fg=self.fg, cursor=self.cursor, font='Arial 11 bold')
-                self.x, self.y = 630, 460
-
-        elif self.app.name == 'init_pot_app':
-            self.bg, self.fg, self.cursor, self.command, self.value = 'grey70', 'black', 'hand2', self.def_value, None
-
-            if self.id == 0:
-                self.config(width=20, height=2, command=self.command, font='Arial 11 bold',
-                            text='Init 0 potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor)
-                self.x, self.y = 100, 200
-
-            elif self.id == 1:
-                self.config(width=20, height=2, command=self.command, font='Arial 11 bold',
-                            text='Init 90 potentiomètre', bg=self.bg, fg=self.fg, cursor=self.cursor)
-                self.x, self.y = 350, 200
+                self.x, self.y = 550, 460
 
         self.bind('<Return>', self.command)
         self.init_y = self.y
@@ -72,21 +54,6 @@ class Tkinter_button(tk.Button):
             self.app.board.stop_recording()
             self.bg = 'green3'
             self.config(bg=self.bg, text='Débuter Acquisition')
-
-    def def_value(*args):
-        self = args[0]
-        if self.app.board.arduinoboard != None:
-            self.app.parent_app.particular_pot_value[self.id] = self.app.board.pin['A0'].read()
-        self.config(bg='grey80', fg='grey50', state=tk.DISABLED)
-
-    def initialiser_potentiometres(*args):
-        self = args[0]
-        if self.app.init_pot_app == None:
-            init_pot_app = tkinter_window.Tkinter_window('init_pot_app', self.app.board, parent_app=self.app)
-            self.app.init_pot_app = init_pot_app
-            init_pot_app.place_all_objects()
-        else:
-            self.app.mouse_click(position = self.app.init_pot_app.center_position)
 
     def motor_direction(*args):
         self = args[0]
@@ -147,20 +114,6 @@ class Tkinter_label(tk.Label):
                 self.config(text='________________________________________________', bg='light blue',
                             fg='blue', width=20, font='Arial 20')
                 self.x, self.y = 240, 385
-
-        elif self.app.name == 'init_pot_app':
-            if self.id == 0:
-                self.config(text='Initialisation du potentiomètre', bg='grey70',
-                            fg='black', font='Impact 30 bold')
-                self.x, self.y = 55, 40
-            if self.id == 1:
-                self.config(text='Valeur 0 potentiomètre : {}'.format(self.app.buttons[0].value), bg='grey70',
-                            fg='black', font='Arial 10')
-                self.x, self.y = 100, 300
-            if self.id == 2:
-                self.config(text='Valeur 90 potentiomètre : {}'.format(self.app.buttons[1].value), bg='grey70',
-                            fg='black', font='Arial 10')
-                self.x, self.y = 350, 300
         self.init_y = self.y
 
 
@@ -181,7 +134,6 @@ class Tkinter_scale(tk.Scale):
                 self.config(label='Vitesse Moteur', orient='horizontal', to=255, cursor=self.cursor, font='Arial 10',
                             resolution=1, tickinterval=25, length=350, bg=self.bg, fg=self.fg, command=self.get_value)
         self.init_y = self.y
-
 
     def get_value(self, value):
         self.value = value
@@ -218,7 +170,7 @@ class Tkinter_canvas(tk.Canvas):
 
         elif self.id == 1:
             self.config(bg='white', height=100, width=400, relief='raised')
-            self.x, self.y = 30, 435
+            self.x, self.y = 100, 435
 
             self.create_text(42, 20, text='Données',
                              font='Arial 10 italic bold', fill='blue')
@@ -268,9 +220,8 @@ class Tkinter_entry(tk.Entry):
                 self.bind('<Return>', self.enter)
                 self.bind('<Button-1>', self.type)
                 self.bind_all('<Key>', self.type)
-                self.x, self.y = 630, 522
+                self.x, self.y = 550, 522
         self.init_y = self.y
-
 
     def enter(self, state):
         if self.id == 0:
@@ -290,7 +241,6 @@ class Tkinter_entry(tk.Entry):
                 self.insert(0, 'Commentaires')
                 self.config(fg='grey')
                 self.app.labels[0].focus()
-
 
     def type(*args):
         self, event = args[0], args[1]
@@ -320,3 +270,58 @@ class Tkinter_entry(tk.Entry):
             else:
                 self.config(fg='green')
             self.app.labels[0].focus()
+
+
+class Tkinter_checkbox(tk.Tk):
+
+    def __init__(self, parent_app):
+        tk.Tk.__init__(self)
+        self.parent_app = parent_app
+        self.buttons = []
+        self.length, self.height = 480, 500 #650
+        self.x, self.y = -10, 0
+        self.geometry(f'{self.length}x{self.height}+{self.x}+{self.y}')
+        self.center_position = ((self.length/2)-9 + self.x, (self.height/2)+9 + self.y)
+        self.configure(bg='light blue')
+        self.title('All Excels')
+
+        class small_button(tk.Button):
+            def __init__(self, app, id, name):
+                tk.Button.__init__(self, app)
+                self.app, self.id, self.name = app, id, name
+                self.config(text=self.name[-30:], command=self.button_command, font='Arial 10 underline', bg="light blue", fg='blue', cursor='hand2')
+                self.place(x=15, y=100+self.id*50)
+                self.app.bind('<Return>', self.button_command)
+            def button_command(*args):
+                self = args[0]
+                try: os.startfile(self.name)
+                except: print("can't")
+
+        l=tk.Label(self, text='All excels', font='Impact 20 bold', fg='navy', bg='light blue', width=10)
+        l.place(x=self.center_position[0]-65, y=10)
+
+        for i in range(len(parent_app.excel_created)):
+            self.buttons.append(small_button(self, i, parent_app.excel_created[i]))
+        self.parent_app.sub_windows.append(self)
+        self.id = len(self.parent_app.sub_windows)-1
+        self.bind('<Escape>', self.kill)
+        self.protocol('WM_DELETE_WINDOW', self.kill)
+
+        def click():
+            self.mouse_click(position = (self.center_position[0], 100))
+        self.after(300, click)
+
+    def kill(*args):
+        self = args[0]
+        self.parent_app.sub_windows.pop(self.id)
+        self.mouse_click(position = self.parent_app.center_position)
+        self.destroy()
+
+    def mouse_click(*args, position = None):
+        self = args[0]
+        mouse = Controller()
+        if position == None:
+            position = Controller().position
+        mouse.position = position
+        mouse.press(Button.left)
+        mouse.release(Button.left)

@@ -6,17 +6,16 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
-from tkinter_objects import Tkinter_button, Tkinter_label, Tkinter_scale, Tkinter_canvas, Tkinter_entry
+from tkinter_objects import Tkinter_button, Tkinter_label, Tkinter_scale, Tkinter_canvas, Tkinter_entry, Tkinter_checkbox
 import main
 import os
 
 class Tkinter_window(tk.Tk):
 
-    def __init__(self, name_of_application, board, init_pot_app=None, parent_app=None):
+    def __init__(self, name_of_application, board, parent_app=None):
         tk.Tk.__init__(self)
         self.name = name_of_application
         self.board = board
-        self.init_pot_app = init_pot_app
         self.plot_app = None
         self.parent_app = parent_app
         self.t0 = time.time()
@@ -25,13 +24,15 @@ class Tkinter_window(tk.Tk):
         self.tick = 0
         self.offset = 0
         self.last_excel_created = None
+        self.excel_created = []
+        self.sub_windows = []
 
         if self.name == 'main':
             self.x, self.y = 470, 0
             self.length, self.height = 800, 800
             self.title("Interface de pilotage du système de stockage d'énergie")
             self.configure(bg='light blue')
-            self.buttons = [Tkinter_button(self, i) for i in range(5)]
+            self.buttons = [Tkinter_button(self, i) for i in range(4)]
             self.labels = [Tkinter_label(self, i) for i in range(2)]
             self.scales = [Tkinter_scale(self, i) for i in range(1)]
             self.canvas = [Tkinter_canvas(self, i) for i in range(2)]
@@ -41,17 +42,8 @@ class Tkinter_window(tk.Tk):
             self.board.app = self
             self.board.reload()
             self.bind('<space>', self.buttons[2].motor_start_stop)
-            self.particular_pot_value = [None, None]
+            # self.particular_pot_value = [None, None]
             self.plot_demanded = False
-
-        elif self.name == 'init_pot_app':
-            self.x, self.y = 10, 50
-            self.length, self.height = 650, 500
-            self.title('Initialisation potentiomètres')
-            self.configure(bg='grey70')
-            self.buttons = [Tkinter_button(self, i) for i in range(2)]
-            self.labels = [Tkinter_label(self, i) for i in range(3)]
-            self.objects = [self.buttons, self.labels]
 
         elif self.name == 'plot_app':
             self.x, self.y = -10, 0
@@ -73,6 +65,8 @@ class Tkinter_window(tk.Tk):
         self.bind('<Control_L>p', self.demand_plot)
         self.bind('<Control_L>o', self.open_excel)
         self.bind('<question>', self.print_shortcut)
+        self.bind('<Control_L>u', self.create_Tkinter_checkbox)
+        self.bind('<Control_L>l', self.begin_recording)
         self.protocol('WM_DELETE_WINDOW', self.kill)
         self.bind_all("<MouseWheel>", self.scroll)
 
@@ -124,20 +118,13 @@ class Tkinter_window(tk.Tk):
             self.canvas[1].itemconfig(7, text='{:.3f}'.format(self.board.distance))
             self.canvas[1].itemconfig(9, text='{:.3f}'.format(self.board.angular_speed))
 
-
-            if self.init_pot_app != None:
-                try:self.init_pot_app.refresh()
-                except:self.init_pot_app = None
-
             if self.plot_app != None:
                 try:self.plot_app.refresh()
                 except:self.plot_app = None
 
-        elif self.name == 'init_pot_app':
-            if self.parent_app.particular_pot_value[0] == None :
-                self.labels[1].config(text='Valeur 0 potentiomètre : {:.3f}'.format(self.board.angular_position))
-            if self.parent_app.particular_pot_value[1] == None :
-                self.labels[2].config(text='Valeur 90 potentiomètre : {:.3f}'.format(self.board.angular_position))
+            for window in self.sub_windows:
+                try: window.update()
+                except: pass
 
         elif self.name == 'plot_app':
             for list_objects in self.objects:
@@ -158,21 +145,17 @@ class Tkinter_window(tk.Tk):
 
     def kill(*args):
         self = args[0]
-        if str(self.focus_get())[:15] == '.!tkinter_entry' or str(self.focus_get())[:16] == '.!tkinter_button':
-            self.focus_get().unfocus()
+        if str(self.focus_get())[:15] == '.!tkinter_entry' or str(self.focus_get())[:16] == '.!tkinter_button' or self.sub_windows != []:
+            if str(self.focus_get())[:15] == '.!tkinter_entry' or str(self.focus_get())[:16] == '.!tkinter_button':
+                self.focus_get().unfocus()
+            if self.sub_windows != []:
+                self.sub_windows[-1].kill()
         else:
             if self.name == 'main':
-                if self.plot_app == None and self.init_pot_app == None:
+                if self.plot_app == None:
                     self.destroy()
-                if self.init_pot_app != None:
-                    self.init_pot_app.kill()
                 if self.plot_app != None:
                     self.plot_app.kill()
-
-            if self.name == 'init_pot_app':
-                try: self.destroy()
-                except: pass
-                self.parent_app.init_pot_app = None
 
             if self.name == 'plot_app':
                 try: self.destroy()
@@ -200,10 +183,18 @@ class Tkinter_window(tk.Tk):
             mouse.press(Button.left)
             mouse.release(Button.left)
 
+    def begin_recording(*args):
+        self = args[0]
+        self.buttons[3].command()
+
     def open_excel(*args):
         self = args[0]
         if self.last_excel_created != None: os.startfile(self.last_excel_created)
         else: print('no last excel created to open')
+
+    def create_Tkinter_checkbox(*args):
+        self = args[0]
+        Tkinter_checkbox(self)
 
     def print_shortcut(*args):
         print("échap : Détruire l'app\nctrl+r : Recharger l'app\nctrl+m : Afficher la position de la souris dans l'app\nctrl+entrée : cliquer\nespace : Démarrer/Arrêter le moteur\nctrl+p : plot la dernière acquisition \nmaj+? : Aide raccourcis\n")
