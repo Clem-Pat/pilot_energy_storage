@@ -6,6 +6,7 @@ import arduino_objects
 import tkinter_window
 
 '''
+637.8 g
 Voltmeter pin A0
 Ammeter pin A1
 Voltmeter 2 pin A2
